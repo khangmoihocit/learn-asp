@@ -1,0 +1,46 @@
+## Build and output directories
+bin/
+obj/
+out/
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio cache and settings
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+## VS Code settings
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+## Rider / JetBrains IDE
+.idea/
+*.DotSettings.user
+
+## User-specific files & local app secrets
+appsettings*.Development.json
+*.local.json
+secrets.json
+
+## Package caches
+*.nupkg
+packages/
+!packages/build/
+
+## Windows and OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+## Log files
+*.log
+logs/
