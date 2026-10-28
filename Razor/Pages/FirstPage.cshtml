@@ -1,0 +1,20 @@
+@page
+<h1 style="color: red;">Day la trang razor dau tien</h1>
+<p>Hoc lap trinh asp .net core <strong>@System.DateTime.Now</strong></p>
+
+@{
+    var a = 3;
+    int b = 2;
+
+    int solanlap = 5;
+    <p>can bac hai cua @a la @Math.Sqrt(a)</p>
+}
+
+<p>Tong cua @a va @b la @(a + b)</p>
+
+<ol>
+    @for (int i = 0; i <= solanlap; i++)
+    {
+        <li>Muc thu @i</li>
+    }
+</ol>

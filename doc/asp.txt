@@ -1,0 +1,17 @@
+dotnet new mvc -n MyMvcApp
+
+cd MyMvcApp
+
+open project: code . -r
+dotnet run
+dotnet watch run: auto update code change
+dotnet build
+dotnet clean
+
+
+dotnet tool install -g dotnet-aspnet-codegenerator
+
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+dotnet add package Microsoft.AspNetCore.Identity.UI
