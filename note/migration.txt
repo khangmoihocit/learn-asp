@@ -1,0 +1,5 @@
+# 1. Tạo migration khởi tạo
+dotnet ef migrations add InitialCreate
+
+# 2. Đẩy migration vào SQL Server để tạo DB và bảng VehicleCategories
+dotnet ef database update
