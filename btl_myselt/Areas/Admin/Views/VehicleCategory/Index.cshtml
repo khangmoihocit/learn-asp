@@ -30,16 +30,17 @@
                     <td>@item.Description</td>
                     <td>
                         <button type="button" class="btn btn-warming btn-sm me-1" data-bs-toggle="modal"
-                            data-bs-target="#editModel-@item.Id">Sửa</button>
-                        <button type="button" class="btn btn-danger btn-sm btn-delete-confirm"
-                        >
+                            data-bs-target="#editModal-@item.Id">Sửa</button>
+                        <button type="button" class="btn btn-danger btn-sm btn-delete-confirm" 
+                            data-bs-target="#deleteModal"
+                            data-bs-toggle="modal">
                             Xóa
                         </button>
                     </td>
                 </tr>
 
                 //modal edit
-                <div class="modal fade" id="editModel-@item.Id" tabindex="-1" aria-hidden="true">
+                <div class="modal fade" id="editModal-@item.Id" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <form asp-action="Edit" asp-route-id="@item.Id" method="post">
@@ -70,12 +71,10 @@
                     </div>
                 </div>
 
-                <div class="modal fade" id="globalDeleteModal" tabindex="-1" aria-hidden="true">
+                <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
-                            <form id="globalDeleteForm" method="post">
-                                @Html.AntiForgeryToken()
-
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post">
                                 <div class="modal-header bg-danger text-white">
                                     <h5 class="modal-title fw-bold">
                                         <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa
