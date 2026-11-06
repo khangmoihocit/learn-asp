@@ -1,0 +1,112 @@
+@model IEnumerable<btl_myselt.Models.Entities.VehicleCategory>
+@{
+    ViewData["Title"] = "Quản lý loại phương tiện";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-dark">Danh sách loại phương tiện</h3>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+        <i class="bi bi-plus-circle me-1"></i> Thêm loại xe mới
+    </button>
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Tên loại xe</th>
+            <th>Mô tả</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Description</td>
+                    <td>
+                        <button type="button" class="btn btn-warming btn-sm me-1" data-bs-toggle="modal"
+                            data-bs-target="#editModel-@item.Id">Sửa</button>
+                        <button type="button" class="btn btn-danger btn-sm btn-delete-confirm"
+                        >
+                            Xóa
+                        </button>
+                    </td>
+                </tr>
+
+                //modal edit
+                <div class="modal fade" id="editModel-@item.Id" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <form asp-action="Edit" asp-route-id="@item.Id" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fw-bold">Sửa loại xe: @item.Name</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <span class="fw-semibold">ID: @item.Id</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Tên loại xe <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" name="Name" value="@item.Name" class="form-control" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Mô tả</label>
+                                        <textarea name="Description" class="form-control" rows="3">@item.Description</textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                    <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="globalDeleteModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <form id="globalDeleteForm" method="post">
+                                @Html.AntiForgeryToken()
+
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title fw-bold">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+
+                                <div class="modal-body text-center py-4">
+                                    <p class="fs-5 text-secondary mb-2" id="globalDeleteMessage">Bạn có chắc chắn muốn xóa mục
+                                        này?</p>
+                                    <h4 class="fw-bold text-danger mb-3" id="globalDeleteTargetName"></h4>
+                                    <small class="text-muted">Hành động này không thể hoàn tác sau khi thực hiện.</small>
+                                </div>
+
+                                <div class="modal-footer justify-content-center border-0 pt-0">
+                                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-danger px-4 fw-semibold">Đồng ý Xóa</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="4" class="text-center py-4 text-muted">Chưa có loại phương tiện nào!</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<partial name="_CreateCategoryModal" model="new btl_myselt.Models.Entities.VehicleCategory()" />

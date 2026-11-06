@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Quản Trị</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+    <!-- Navbar trên cùng -->
+    <nav class="navbar navbar-dark bg-dark px-3 shadow-sm sticky-top">
+        <a class="navbar-brand fw-bold" style="font-size: 14px;" asp-area="Admin" asp-controller="VehicleCategory" asp-action="Index">
+            <i class="bi bi-speedometer2 me-2"></i>ADMIN DASHBOARD
+        </a>
+        <div class="d-flex align-items-center">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-outline-light btn-sm me-2">
+                <i class="bi bi-box-arrow-up-right me-1"></i>Về trang Web
+            </a>
+            <span class="text-white small">Xin chào, <strong>Admin</strong></span>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar bên trái -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-white sidebar py-4 border-end min-vh-100">
+                <div class="position-sticky">
+                    <h6 class="sidebar-heading px-3 text-muted text-uppercase small fw-bold mb-3">Quản lý phương tiện</h6>
+                    <ul class="nav flex-column gap-1">
+                        <li class="nav-item">
+                            <a class="nav-link active rounded px-3 text-dark fw-semibold bg-light" asp-area="Admin" asp-controller="VehicleCategory" asp-action="Index">
+                                <i class="bi bi-tags me-2 text-primary"></i>Loại phương tiện
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link rounded px-3 text-secondary" href="#">
+                                <i class="bi bi-car-front me-2"></i>Danh sách xe
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,25 @@
+Bây giờ ở bất cứ trang nào (như VehicleCategory/Index.cshtml, hay sau này là Vehicle/Index.cshtml), ở nút Xóa bạn chỉ cần viết đúng 1 dòng HTML này:
+
+html
+<!-- Dành cho Danh mục xe: -->
+<button type="button" 
+        class="btn btn-danger btn-sm btn-delete-confirm" 
+        data-action-url="@Url.Action("Delete", "VehicleCategory", new { id = item.Id })" 
+        data-item-name="@item.Name" 
+        data-bs-toggle="modal" 
+        data-bs-target="#globalDeleteModal">
+    Xóa
+</button>
+
+Và sau này khi bạn làm sang bảng Quản lý xe (Vehicle), bạn cũng dùng lại y hệt:
+
+html
+<!-- Dành cho Xe: -->
+<button type="button" 
+        class="btn btn-danger btn-sm btn-delete-confirm" 
+        data-action-url="@Url.Action("Delete", "Vehicle", new { id = item.Id })" 
+        data-item-name="@item.LicensePlate" 
+        data-bs-toggle="modal" 
+        data-bs-target="#globalDeleteModal">
+    Xóa
+</button>
