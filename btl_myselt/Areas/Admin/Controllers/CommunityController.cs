@@ -12,7 +12,7 @@ namespace btl_myselt.Areas.Admin.Controllers
     [Area("Admin")]
     public class CommunityController : Controller
     {
-        public ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
         public CommunityController(ApplicationDbContext context)
         {
             _context = context;
@@ -87,7 +87,7 @@ namespace btl_myselt.Areas.Admin.Controllers
             community.IsActive = !community.IsActive;
             _context.Communities.Update(community);
             await _context.SaveChangesAsync();
-            
+
             return RedirectToAction(nameof(Index));
         }
 

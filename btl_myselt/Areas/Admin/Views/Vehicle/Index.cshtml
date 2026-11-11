@@ -1,0 +1,287 @@
+@model IEnumerable<btl_myselt.Models.Entities.Vehicle>
+@using btl_myselt.Models.Enums
+
+@{
+    ViewData["Title"] = "Quản lý phương tiện";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-dark">Danh sách phương tiện</h3>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createVehicleModal">
+        <i class="bi bi-plus-circle me-1"></i> Thêm xe mới
+    </button>
+</div>
+
+<table class="table table-hover table-bordered table-striped align-middle mb-0" id="vehicleTable">
+    <thead>
+        <tr>
+            <th style="width: 70px;">Ảnh</th>
+            <th>Tên xe</th>
+            <th>Loại xe</th>
+            <th>Khu dân cư</th>
+            <th>Chủ xe</th>
+            <th>Giá thuê</th>
+            <th>Trạng thái</th>
+            <th class="text-center" style="width: 160px;">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                var primaryImg = item.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? "/images/default-vehicle.png";
+                <tr id="row-@item.Id">
+                    <td>
+                        <img src="@primaryImg" class="rounded" style="width: 50px; height: 50px; object-fit: cover;"
+                            onerror="this.src='https://placehold.co/50x50?text=Xe'" />
+                    </td>
+                    <td class="fw-bold text-primary cell-name">@item.Name</td>
+                    <td class="cell-category">@item.Category?.Name</td>
+                    <td class="cell-community">@item.Community?.Name</td>
+                    <td>@(item.Owner?.FullName ?? "—")</td>
+                    <td class="text-danger fw-semibold cell-price">@item.Price.ToString("N0") đ</td>
+                    <td class="cell-status">
+                        @if (item.Status == VehicleStatus.Available)
+                        {
+                            <span class="badge bg-success">Sẵn sàng</span>
+                        }
+                        else if (item.Status == VehicleStatus.Rented)
+                        {
+                            <span class="badge bg-warning text-dark">Đang thuê</span>
+                        }
+                        else if (item.Status == VehicleStatus.Maintenance)
+                        {
+                            <span class="badge bg-warning text-dark">Bảo trì</span>
+                        }
+                        else if (item.Status == VehicleStatus.Hidden)
+                        {
+                            <span class="badge bg-secondary ">Chủ sở hữu tạm ẩn</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Không xác định</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-warning btn-sm me-1 btn-edit-vehicle"
+                            data-id="@item.Id">Sửa</button>
+                        <button type="button" class="btn btn-danger btn-sm btn-delete-confirm"
+                            data-action-url="@Url.Action("Delete", "Vehicle", new { area = "Admin", id = item.Id })"
+                            data-item-name="@item.Name" data-bs-toggle="modal" data-bs-target="#globalDeleteModal">
+                            Xóa
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr id="emptyRow">
+                <td colspan="8" class="text-center py-4 text-muted">Chưa có phương tiện nào trong hệ thống!</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="createVehicleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <!-- Form có upload ảnh nên bắt buộc có enctype="multipart/form-data" -->
+            <form id="createVehicleForm" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold">Thêm phương tiện mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tên xe <span class="text-danger">*</span></label>
+                        <input type="text" name="Name" class="form-control" placeholder="Ví dụ: Honda Vision 2023"
+                            required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Giá thuê (VNĐ / ngày)</label>
+                        <input type="number" name="Price" class="form-control" value="50000" min="0" step="1000"
+                            required />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Loại xe</label>
+                        <select name="CategoryId" class="form-select" asp-items="ViewBag.Categories" required></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Khu dân cư</label>
+                        <select name="CommunityId" class="form-select" asp-items="ViewBag.Communities"
+                            required></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Chủ sở hữu</label>
+                        <select name="OwnerId" class="form-select" asp-items="ViewBag.Owners" required></select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ảnh xe</label>
+                        <input type="file" name="imageFile" class="form-control" accept="image/*" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tình trạng</label>
+                        <input type="text" name="Condition" class="form-control"
+                            placeholder="Ví dụ: Mới 95%, đầy bình xăng" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Mô tả chi tiết</label>
+                        <textarea name="Description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary fw-semibold">Lưu phương tiện</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL SỬA THÔNG TIN XE ================= -->
+<div class="modal fade" id="editVehicleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form id="editVehicleForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editVehicleId" name="Id" />
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold">Chỉnh sửa thông tin xe</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tên xe <span class="text-danger">*</span></label>
+                        <input type="text" id="editName" name="Name" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Giá thuê (VNĐ)</label>
+                        <input type="number" id="editPrice" name="Price" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Loại xe</label>
+                        <select id="editCategoryId" name="CategoryId" class="form-select"
+                            asp-items="ViewBag.Categories"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Khu dân cư</label>
+                        <select id="editCommunityId" name="CommunityId" class="form-select"
+                            asp-items="ViewBag.Communities"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Trạng thái</label>
+                        <select id="editStatus" name="Status" class="form-select">
+                            <option value="0">Sẵn sàng</option>
+                            <option value="1">Đang thuê</option>
+                            <option value="2">Bảo trì</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Mô tả</label>
+                        <textarea id="editDesc" name="Description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-warning fw-semibold">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $('#createVehicleForm').submit(function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: 'Admin/Vehicle/Create',
+                type: 'POST',
+                data: formData,
+                contentType: false, //khi co file
+                processData: false, //khi co file
+                success: function (res) {
+                    if (res.success) {
+                        $('#createVehicleModal').model('hide');
+                        $('#createVehicleForm')[0].reset();
+                        $('#emptyRow').remove();
+
+                        var row = `
+                                <tr id="row-${res.data.id}">
+                                    <td>
+                                        <img src="${res.data.imageUrl}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;" />
+                                    </td>
+                                    <td class="fw-bold text-primary cell-name">${res.data.name}</td>
+                                    <td class="cell-category">${res.data.categoryName || '—'}</td>
+                                    <td class="cell-community">${res.data.communityName || '—'}</td>
+                                    <td>${res.data.ownerName || '—'}</td>
+                                    <td class="text-danger fw-semibold cell-price">${Number(res.data.price).toLocaleString()} đ</td>
+                                    <td class="cell-status"><span class="badge bg-success">Sẵn sàng</span></td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-warning btn-sm me-1 btn-edit-vehicle" data-id="${res.data.id}">Sửa</button>
+                                        <button type="button" class="btn btn-danger btn-sm btn-delete-confirm"
+                                            data-action-url="/Admin/Vehicle/Delete/${res.data.id}"
+                                            data-item-name="${res.data.name}" data-bs-toggle="modal" data-bs-target="#globalDeleteModal">Xóa</button>
+                                    </td>
+                                </tr>`;
+                        $('#vehicleTable tbody').prepend(row)
+                    } else {
+                        alert(res.message);
+                    }
+                }
+            });
+        });
+
+        //ajax load data len modal sua
+         $(document).on('click', '.btn-edit-vehicle', function () {
+            var id = $(this).data('id');
+            $.get('/Admin/Vehicle/GetVehicle/' + id, function (res) {
+                if (res.success) {
+                    $('#editVehicleId').val(res.data.id);
+                    $('#editName').val(res.data.name);
+                    $('#editPrice').val(res.data.price);
+                    $('#editCategoryId').val(res.data.categoryId);
+                    $('#editCommunityId').val(res.data.communityId);
+                    $('#editStatus').val(res.data.status);
+                    $('#editDesc').val(res.data.description);
+                    $('#editVehicleModal').modal('show');
+                }
+            });
+        });
+
+        //ajax luu sua
+        $('#editVehicleForm').submit(function (e) {
+            e.preventDefault();
+            var id = $('#editVehicleId').val();
+            $.ajax({
+                url: '/Admin/Vehicle/Edit/' + id,
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (res) {
+                    if (res.success) {
+                        $('#editVehicleModal').modal('hide');
+                        // Cập nhật lại trực tiếp nội dung các ô trên dòng đó
+                        var row = $('#row-' + id);
+                        row.find('.cell-name').text(res.data.name);
+                        row.find('.cell-category').text(res.data.categoryName);
+                        row.find('.cell-community').text(res.data.communityName);
+                        row.find('.cell-price').text(Number(res.data.price).toLocaleString() + ' đ');
+                        var badge = res.data.status === 'Available' ? '<span class="badge bg-success">Sẵn sàng</span>' : '<span class="badge bg-warning text-dark">Đang thuê</span>';
+                        row.find('.cell-status').html(badge);
+                    } else {
+                        alert(res.message);
+                    }
+                }
+            });
+        });
+    </script>
+}
