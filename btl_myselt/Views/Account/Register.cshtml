@@ -93,13 +93,11 @@
 
             var isValid = true;
 
-            // 1. Validate Họ và tên
             if (!fullName) {
                 $('#errFullName').text('Vui lòng nhập họ và tên!');
                 isValid = false;
             }
-
-            // 2. Validate Email bằng Regex
+            
             if (!email) {
                 $('#errEmail').text('Vui lòng nhập email!');
                 isValid = false;
@@ -108,7 +106,6 @@
                 isValid = false;
             }
 
-            // 3. Validate Số điện thoại bằng Regex
             if (!phone) {
                 $('#errPhone').text('Vui lòng nhập số điện thoại!');
                 isValid = false;
@@ -117,13 +114,11 @@
                 isValid = false;
             }
 
-            // 4. Validate Khu dân cư
             if (communityId <= 0) {
                 $('#errCommunity').text('Vui lòng chọn khu dân cư sinh sống!');
                 isValid = false;
             }
 
-            // 5. Validate Mật khẩu
             if (!password) {
                 $('#errPassword').text('Vui lòng nhập mật khẩu!');
                 isValid = false;
@@ -132,7 +127,6 @@
                 isValid = false;
             }
 
-            // 6. Validate Xác nhận mật khẩu
             if (!confirmPassword) {
                 $('#errConfirmPassword').text('Vui lòng xác nhận lại mật khẩu!');
                 isValid = false;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using btl_myselt.Data;
 using btl_myselt.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 namespace btl_myselt.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "ADMIN")]
     public class VehicleCategoryController : Controller
     {
         private readonly ApplicationDbContext _context;
