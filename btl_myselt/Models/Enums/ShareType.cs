@@ -1,8 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace btl_myselt.Models.Enums
 {
     public enum ShareType
     {
+        [Display(Name = "Miễn phí")]
         Free = 0,
-        Rental = 1,
+
+        [Display(Name = "Cho thuê")]
+        Rental = 1
     }
 }

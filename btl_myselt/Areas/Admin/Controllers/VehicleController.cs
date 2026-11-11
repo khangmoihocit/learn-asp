@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using btl_myselt.Data;
 using btl_myselt.Models.Entities;
+using btl_myselt.Models.Enums;
 
 namespace btl_myselt.Areas.Admin.Controllers
 {
@@ -49,6 +50,11 @@ namespace btl_myselt.Areas.Admin.Controllers
         {
             try
             {
+                if (vehicle.ShareType == ShareType.Free)
+                {
+                    vehicle.Price = 0;
+                }
+
                 if (!ModelState.IsValid)
                 {
                     return Json(new { success = false, message = "Dữ liệu nhập không hợp lệ!" });
@@ -99,9 +105,10 @@ namespace btl_myselt.Areas.Admin.Controllers
                     {
                         id = vehicle.Id,
                         name = vehicle.Name,
-                        categoryName = categoryName,
-                        communityName = communityName,
-                        ownerName = ownerName,
+                        categoryName = categoryName ?? "—",
+                        communityName = communityName ?? "—",
+                        ownerName = ownerName ?? "—",
+                        shareType = vehicle.ShareType.ToString(),
                         price = vehicle.Price,
                         status = vehicle.Status.ToString(),
                         imageUrl = imageUrl ?? "/images/default-vehicle.png"
@@ -134,9 +141,10 @@ namespace btl_myselt.Areas.Admin.Controllers
                         communityId = v.CommunityId,
                         ownerId = v.OwnerId,
                         price = v.Price,
-                        condition = v.Condition,
-                        description = v.Description,
-                        status = (int)v.Status
+                        shareType = (int)v.ShareType,
+                        status = (int)v.Status,
+                        condition = v.Condition ?? string.Empty,
+                        description = v.Description ?? string.Empty
                     }
                 });
             }
@@ -147,12 +155,65 @@ namespace btl_myselt.Areas.Admin.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetVehicleDetails(int id)
+        {
+            try
+            {
+                var v = await _context.Vehicles
+                    .Include(x => x.Category)
+                    .Include(x => x.Community)
+                    .Include(x => x.Owner)
+                    .Include(x => x.Images)
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                if (v == null) return Json(new { success = false, message = "Không tìm thấy xe!" });
+
+                return Json(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        id = v.Id,
+                        name = v.Name,
+                        categoryName = v.Category?.Name ?? "—",
+                        communityName = v.Community?.Name ?? "—",
+                        communityAddress = v.Community?.Address ?? "—",
+                        ownerName = v.Owner?.FullName ?? "—",
+                        ownerPhone = v.Owner?.PhoneNumber ?? "—",
+                        ownerEmail = v.Owner?.Email ?? "—",
+                        price = v.Price,
+                        condition = string.IsNullOrEmpty(v.Condition) ? "Bình thường" : v.Condition,
+                        description = string.IsNullOrEmpty(v.Description) ? "Không có mô tả chi tiết" : v.Description,
+                        shareType = v.ShareType == ShareType.Free ? "Miễn phí" : "Cho thuê",
+                        status = v.Status.ToString(),
+                        images = v.Images.Select(i => new
+                        {
+                            id = i.Id,
+                            imageUrl = i.ImageUrl,
+                            isPrimary = i.IsPrimary
+                        }).ToList()
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy chi tiết xe ID: {Id}", id);
+                return Json(new { success = false, message = "Không thể lấy thông tin chi tiết xe!" });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Edit(int id, Vehicle vehicle)
         {
             try
             {
                 if (id != vehicle.Id) return Json(new { success = false, message = "Không tìm thấy xe!" });
+
+                if (vehicle.ShareType == ShareType.Free)
+                {
+                    vehicle.Price = 0;
+                }
 
                 if (ModelState.IsValid)
                 {
@@ -161,6 +222,7 @@ namespace btl_myselt.Areas.Admin.Controllers
 
                     var categoryName = (await _context.VehicleCategories.FindAsync(vehicle.CategoryId))?.Name;
                     var communityName = (await _context.Communities.FindAsync(vehicle.CommunityId))?.Name;
+                    var ownerName = (await _context.Users.FindAsync(vehicle.OwnerId))?.FullName;
 
                     return Json(new
                     {
@@ -170,8 +232,10 @@ namespace btl_myselt.Areas.Admin.Controllers
                         {
                             id = vehicle.Id,
                             name = vehicle.Name,
-                            categoryName = categoryName,
-                            communityName = communityName,
+                            categoryName = categoryName ?? "—",
+                            communityName = communityName ?? "—",
+                            ownerName = ownerName ?? "—",
+                            shareType = vehicle.ShareType.ToString(),
                             price = vehicle.Price,
                             status = vehicle.Status.ToString()
                         }
