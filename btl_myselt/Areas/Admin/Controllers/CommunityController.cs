@@ -79,5 +79,17 @@ namespace btl_myselt.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatus(int id){
+            var community = await _context.Communities.FindAsync(id);
+            if(community == null) return NotFound();
+
+            community.IsActive = !community.IsActive;
+            _context.Communities.Update(community);
+            await _context.SaveChangesAsync();
+            
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

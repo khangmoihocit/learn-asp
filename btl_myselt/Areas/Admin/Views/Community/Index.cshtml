@@ -30,7 +30,27 @@
                     <td class="fw-bold text-muted">#@item.Id</td>
                     <td class="fw-semibold text-primary">@item.Name</td>
                     <td>@item.Address</td>
-                    <td>d</td>
+                    <td>
+                        <form asp-action="ToggleStatus" asp-route-id="@item.Id" method="post" style="display:inline;">
+                            @if (item.IsActive)
+                            {
+                                <button type="submit" class="btn btn-sm btn-outline-success border-0 p-1" title="Bấm để tạm dừng">
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>Hoạt động
+                                    </span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-sm btn-outline-secondary border-0 p-1"
+                                    title="Bấm để kích hoạt">
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-pause-circle me-1"></i>Tạm khóa
+                                    </span>
+                                </button>
+                            }
+                        </form>
+                    </td>
                     <td class="text-center">
                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm me-1">
                             Sửa
