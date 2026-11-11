@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using btl_myselt.Helpers;
 using btl_myselt.Models.Entities;
 using btl_myselt.Models.Enums;
 
@@ -46,6 +47,24 @@ namespace btl_myselt.Data
                     new VehicleCategory { Name = "Xe thể thao / Sang trọng", Description = "Trải nghiệm lái cao cấp, sự kiện đặc biệt" }
                 };
                 context.VehicleCategories.AddRange(categories);
+                context.SaveChanges();
+            }
+
+            if (context.Users.FirstOrDefault(u => u.Email == "admin@gmail.com") == null)
+            {
+                var defaultPass = PasswordHelper.HashPassword("123456");
+                var comIds = context.Communities.Select(c => c.Id).ToList();
+                var user = new User
+                {
+                    FullName = "Quản trị viên",
+                    Email = "admin@gmail.com",
+                    PhoneNumber = "0901234567",
+                    Password = defaultPass,
+                    Role = "ADMIN",
+                    MemberStatus = MemberStatus.Active,
+                    CommunityId = comIds[1]
+                };
+                context.Users.Add(user);
                 context.SaveChanges();
             }
 
@@ -188,8 +207,8 @@ namespace btl_myselt.Data
                             ReviewerId = b.BorrowerId,       // Người thuê đánh giá
                             RevieweeId = vehicle.OwnerId,     // Chủ xe được nhận đánh giá
                             Rating = count % 2 == 0 ? 5 : 4,
-                            Comment = count % 2 == 0 
-                                ? "Chủ xe siêu nhiệt tình, xe chạy rất êm và tiết kiệm xăng. Lần sau sẽ ủng hộ tiếp!" 
+                            Comment = count % 2 == 0
+                                ? "Chủ xe siêu nhiệt tình, xe chạy rất êm và tiết kiệm xăng. Lần sau sẽ ủng hộ tiếp!"
                                 : "Xe sạch sẽ, giao nhận xe đúng giờ, thủ tục rất nhanh gọn lẹ.",
                             CreatedAt = DateTime.Now.AddDays(-count)
                         });

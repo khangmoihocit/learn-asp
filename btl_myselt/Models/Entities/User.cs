@@ -28,6 +28,13 @@ namespace btl_myselt.Models.Entities
         [StringLength(11, ErrorMessage = "Tối đa 11 ký tự")]
         public string PhoneNumber { get; set; } = string.Empty;
 
+        [StringLength(255, ErrorMessage = "Mật khẩu không được vượt quá 255 kí tự")]
+        [MinLength(6, ErrorMessage = "Mật khẩu cần ít nhất 6 kí tự")]
+        public string Password { get; set; } = string.Empty;
+
+        [StringLength(50)]
+        public string Role { get; set; } = "USER";
+
         public MemberStatus MemberStatus { get; set; } = MemberStatus.Pending;
     }
 }

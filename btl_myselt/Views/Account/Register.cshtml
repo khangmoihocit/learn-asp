@@ -1,0 +1,196 @@
+@using btl_myselt.Models.Entities
+@{
+    ViewData["Title"] = "Đăng ký thành viên";
+    var communities = ViewBag.Communities as List<Community> ?? new List<Community>();
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-4">
+                <h3 class="fw-bold text-center text-primary mb-1">Tạo Tài Khoản Cư Dân</h3>
+                <p class="text-center text-muted small mb-3">Tham gia cộng đồng chia sẻ phương tiện văn minh</p>
+
+                <!-- Hộp thông báo lỗi/thành công -->
+                <div id="registerAlert" class="alert d-none py-2 small"></div>
+
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Họ và tên</label>
+                        <input type="text" id="regFullName" class="form-control" placeholder="Nguyễn Văn A" />
+                        <span id="errFullName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Email</label>
+                            <input type="text" id="regEmail" class="form-control" placeholder="name@domain.com" />
+                            <span id="errEmail" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Số điện thoại</label>
+                            <input type="text" id="regPhone" class="form-control" placeholder="09xxxxxxxx" />
+                            <span id="errPhone" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Khu dân cư sinh sống</label>
+                        <select id="regCommunityId" class="form-select">
+                            <option value="0">-- Chọn khu dân cư --</option>
+                            @foreach (var c in communities)
+                            {
+                                <option value="@c.Id">@c.Name (@c.Address)</option>
+                            }
+                        </select>
+                        <span id="errCommunity" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Mật khẩu</label>
+                            <input type="password" id="regPassword" class="form-control" placeholder="Tối thiểu 6 ký tự" />
+                            <span id="errPassword" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Nhập lại mật khẩu</label>
+                            <input type="password" id="regConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" />
+                            <span id="errConfirmPassword" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnRegister" class="btn btn-primary w-100 fw-semibold py-2 mb-3">
+                        Đăng Ký
+                    </button>
+
+                    <div class="text-center small">
+                        Đã có tài khoản? <a asp-action="Login" class="text-decoration-none fw-semibold">Đăng nhập</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var emailRegex = /^[\w-\.]+@@([\w-]+\.)+[\w-]{2,4}$/;
+        var phoneRegex = /^0\d{9}$/;
+
+        $('#registerForm').on('submit', function (e) {
+            e.preventDefault();
+
+            // Xóa thông báo lỗi cũ
+            $('#registerAlert').addClass('d-none').removeClass('alert-danger alert-success').text('');
+            $('span[id^="err"]').text('');
+
+            var fullName = $('#regFullName').val().trim();
+            var email = $('#regEmail').val().trim();
+            var phone = $('#regPhone').val().trim();
+            var communityId = parseInt($('#regCommunityId').val()) || 0;
+            var password = $('#regPassword').val();
+            var confirmPassword = $('#regConfirmPassword').val();
+
+            var isValid = true;
+
+            // 1. Validate Họ và tên
+            if (!fullName) {
+                $('#errFullName').text('Vui lòng nhập họ và tên!');
+                isValid = false;
+            }
+
+            // 2. Validate Email bằng Regex
+            if (!email) {
+                $('#errEmail').text('Vui lòng nhập email!');
+                isValid = false;
+            } else if (!emailRegex.test(email)) {
+                $('#errEmail').text('Email không đúng định dạng (Ví dụ: name@domain.com)!');
+                isValid = false;
+            }
+
+            // 3. Validate Số điện thoại bằng Regex
+            if (!phone) {
+                $('#errPhone').text('Vui lòng nhập số điện thoại!');
+                isValid = false;
+            } else if (!phoneRegex.test(phone)) {
+                $('#errPhone').text('Số điện thoại phải gồm 10 số và bắt đầu bằng số 0!');
+                isValid = false;
+            }
+
+            // 4. Validate Khu dân cư
+            if (communityId <= 0) {
+                $('#errCommunity').text('Vui lòng chọn khu dân cư sinh sống!');
+                isValid = false;
+            }
+
+            // 5. Validate Mật khẩu
+            if (!password) {
+                $('#errPassword').text('Vui lòng nhập mật khẩu!');
+                isValid = false;
+            } else if (password.length < 6) {
+                $('#errPassword').text('Mật khẩu phải từ 6 ký tự trở lên!');
+                isValid = false;
+            }
+
+            // 6. Validate Xác nhận mật khẩu
+            if (!confirmPassword) {
+                $('#errConfirmPassword').text('Vui lòng xác nhận lại mật khẩu!');
+                isValid = false;
+            } else if (password !== confirmPassword) {
+                $('#errConfirmPassword').text('Mật khẩu xác nhận không khớp!');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Dữ liệu hợp lệ -> Gửi AJAX
+            var postData = {
+                fullName: fullName,
+                email: email,
+                phoneNumber: phone,
+                communityId: communityId,
+                password: password,
+                confirmPassword: confirmPassword
+            };
+
+            $('#btnRegister').prop('disabled', true).text('Đang xử lý...');
+
+            $.ajax({
+                url: '/Account/Register',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(postData),
+                success: function (res) {
+                    $('#btnRegister').prop('disabled', false).text('Đăng Ký');
+
+                    if (res.success) {
+                        $('#registerAlert')
+                            .removeClass('d-none alert-danger')
+                            .addClass('alert-success')
+                            .text(res.message);
+
+                        $('#registerForm input, #registerForm select, #btnRegister').prop('disabled', true);
+
+                        // Tự động chuyển sang trang Đăng nhập sau 1.2s
+                        setTimeout(function () {
+                            window.location.href = res.redirectUrl;
+                        }, 1200);
+                    } else {
+                        // Thất bại -> Báo lỗi, giữ nguyên toàn bộ form
+                        $('#registerAlert')
+                            .removeClass('d-none alert-success')
+                            .addClass('alert-danger')
+                            .text(res.message);
+                    }
+                },
+                error: function () {
+                    $('#btnRegister').prop('disabled', false).text('Đăng Ký');
+                    $('#registerAlert')
+                        .removeClass('d-none alert-success')
+                        .addClass('alert-danger')
+                        .text('Lỗi kết nối tới máy chủ, vui lòng thử lại!');
+                }
+            });
+        });
+    </script>
+}

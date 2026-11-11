@@ -1,0 +1,12 @@
+@{
+    ViewData["Title"] = "Không có quyền truy cập";
+}
+
+<div class="container py-5 text-center">
+    <div class="py-5 bg-white rounded shadow-sm border p-4 col-md-6 mx-auto">
+        <i class="bi bi-shield-x text-danger display-1 mb-3"></i>
+        <h4 class="fw-bold text-danger">Truy Cập Bị Từ Chối!</h4>
+        <p class="text-muted small mb-4">Bạn không có quyền quản trị để truy cập vào khu vực này.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-sm">Về trang chủ</a>
+    </div>
+</div>

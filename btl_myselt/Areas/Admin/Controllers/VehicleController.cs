@@ -11,10 +11,12 @@ using Microsoft.Extensions.Logging;
 using btl_myselt.Data;
 using btl_myselt.Models.Entities;
 using btl_myselt.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
 
 namespace btl_myselt.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "ADMIN")]
     public class VehicleController : Controller
     {
         private readonly ApplicationDbContext _context;

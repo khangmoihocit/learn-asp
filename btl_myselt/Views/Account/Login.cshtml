@@ -1,0 +1,105 @@
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 p-4">
+                <h3 class="fw-bold text-center text-primary mb-3">Đăng Nhập</h3>
+
+                <!-- Hộp thông báo lỗi -->
+                <div id="loginAlert" class="alert alert-danger py-2 small d-none"></div>
+
+                <form id="loginForm">
+                    <input type="hidden" id="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Email tài khoản</label>
+                        <input type="text" id="email" class="form-control" placeholder="name@domain.com" />
+                        <span id="emailError" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Mật khẩu</label>
+                        <input type="password" id="password" class="form-control" placeholder="Nhập mật khẩu..." />
+                        <span id="passwordError" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" id="btnLogin" class="btn btn-primary w-100 fw-semibold py-2 mb-3">
+                        Đăng nhập
+                    </button>
+
+                    <div class="text-center small">
+                        Chưa có tài khoản? <a asp-action="Register" class="text-decoration-none fw-semibold">Đăng ký ngay</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var emailRegex = /^[\w-\.]+@@([\w-]+\.)+[\w-]{2,4}$/;
+
+        $('#loginForm').on('submit', function (e) {
+            e.preventDefault();
+
+            // Xóa thông báo lỗi cũ
+            $('#loginAlert').addClass('d-none').text('');
+            $('#emailError').text('');
+            $('#passwordError').text('');
+
+            var email = $('#email').val().trim();
+            var password = $('#password').val();
+            var isValid = true;
+
+            if (!email) {
+                $('#emailError').text('Vui lòng nhập email!');
+                isValid = false;
+            } else if (!emailRegex.test(email)) {
+                $('#emailError').text('Email không đúng định dạng (Ví dụ: user@gmail.com)!');
+                isValid = false;
+            }
+
+            if (!password) {
+                $('#passwordError').text('Vui lòng nhập mật khẩu!');
+                isValid = false;
+            } else if (password.length < 6) {
+                $('#passwordError').text('Mật khẩu phải từ 6 ký tự trở lên!');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            var postData = {
+                email: email,
+                password: password,
+                returnUrl: $('#returnUrl').val()
+            };
+
+            $('#btnLogin').prop('disabled', true).text('Đang xử lý...');
+
+            $.ajax({
+                url: '/Account/Login',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(postData),
+                success: function (res) {
+                    $('#btnLogin').prop('disabled', false).text('Đăng nhập');
+
+                    if (res.success) {
+                        window.location.href = res.redirectUrl;
+                    } else {
+                        $('#loginAlert').removeClass('d-none').text(res.message);
+                    }
+                },
+                error: function () {
+                    $('#btnLogin').prop('disabled', false).text('Đăng nhập');
+                    $('#loginAlert').removeClass('d-none').text('Lỗi kết nối máy chủ, vui lòng thử lại!');
+                }
+            });
+        });
+    </script>
+}
