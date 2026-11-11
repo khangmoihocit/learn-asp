@@ -44,3 +44,5 @@ $RECYCLE.BIN/
 ## Log files
 *.log
 logs/
+
+uploads

@@ -1,13 +1,15 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using btl_myselt.Data;
-using btl_myselt.Models.Entities;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Update.Internal;
+using Microsoft.Extensions.Logging;
+using btl_myselt.Data;
+using btl_myselt.Models.Entities;
 
 namespace btl_myselt.Areas.Admin.Controllers
 {
@@ -16,11 +18,13 @@ namespace btl_myselt.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly ILogger<VehicleController> _logger;
 
-        public VehicleController(ApplicationDbContext context, IWebHostEnvironment env)
+        public VehicleController(ApplicationDbContext context, IWebHostEnvironment env, ILogger<VehicleController> logger)
         {
             _context = context;
             _env = env;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -36,15 +40,21 @@ namespace btl_myselt.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(await _context.VehicleCategories.ToListAsync(), "Id", "Name");
             ViewBag.Communities = new SelectList(await _context.Communities.Where(c => c.IsActive).ToListAsync(), "Id", "Name");
             ViewBag.Owners = new SelectList(await _context.Users.ToListAsync(), "Id", "FullName");
+
             return View(vehicles);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Vehicle vehicle, IFormFile imageFile)
+        public async Task<IActionResult> Create(Vehicle vehicle, IFormFile? imageFile)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(vehicle);
+                if (!ModelState.IsValid)
+                {
+                    return Json(new { success = false, message = "Dữ liệu nhập không hợp lệ!" });
+                }
+
+                _context.Vehicles.Add(vehicle);
                 await _context.SaveChangesAsync();
 
                 string? imageUrl = null;
@@ -98,71 +108,224 @@ namespace btl_myselt.Areas.Admin.Controllers
                     }
                 });
             }
-            return Json(new { success = false, message = "Dữ liệu không hợp lệ! Vui lòng kiểm tra lại." });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi thêm phương tiện");
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetVehicle(int id)
         {
-            var v = await _context.Vehicles.FindAsync(id);
-            if (v == null) return Json(new { success = false });
-            return Json(new
+            try
             {
-                success = true,
-                data = new
-                {
-                    id = v.Id,
-                    name = v.Name,
-                    categoryId = v.CategoryId,
-                    communityId = v.CommunityId,
-                    ownerId = v.OwnerId,
-                    price = v.Price,
-                    condition = v.Condition,
-                    description = v.Description,
-                    status = (int)v.Status
-                }
-            });
-        }
-        
-        [HttpPost]
-        public async Task<IActionResult> Edit(int id, Vehicle vehicle)
-        {
-            if (id != vehicle.Id) return Json(new { success = false, message = "Không tìm thấy xe!" });
-            if (ModelState.IsValid)
-            {
-                _context.Update(vehicle);
-                await _context.SaveChangesAsync();
-                var categoryName = (await _context.VehicleCategories.FindAsync(vehicle.CategoryId))?.Name;
-                var communityName = (await _context.Communities.FindAsync(vehicle.CommunityId))?.Name;
+                var v = await _context.Vehicles.FindAsync(id);
+                if (v == null) return Json(new { success = false, message = "Không tìm thấy xe!" });
+
                 return Json(new
                 {
                     success = true,
-                    message = "Cập nhật thành công!",
                     data = new
                     {
-                        id = vehicle.Id,
-                        name = vehicle.Name,
-                        categoryName = categoryName,
-                        communityName = communityName,
-                        price = vehicle.Price,
-                        status = vehicle.Status.ToString()
+                        id = v.Id,
+                        name = v.Name,
+                        categoryId = v.CategoryId,
+                        communityId = v.CommunityId,
+                        ownerId = v.OwnerId,
+                        price = v.Price,
+                        condition = v.Condition,
+                        description = v.Description,
+                        status = (int)v.Status
                     }
                 });
             }
-            return Json(new { success = false, message = "Dữ liệu cập nhật không hợp lệ!" });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy thông tin xe ID: {Id}", id);
+                return Json(new { success = false, message = "Không thể lấy thông tin xe!" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, Vehicle vehicle)
+        {
+            try
+            {
+                if (id != vehicle.Id) return Json(new { success = false, message = "Không tìm thấy xe!" });
+
+                if (ModelState.IsValid)
+                {
+                    _context.Vehicles.Update(vehicle);
+                    await _context.SaveChangesAsync();
+
+                    var categoryName = (await _context.VehicleCategories.FindAsync(vehicle.CategoryId))?.Name;
+                    var communityName = (await _context.Communities.FindAsync(vehicle.CommunityId))?.Name;
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Cập nhật thành công!",
+                        data = new
+                        {
+                            id = vehicle.Id,
+                            name = vehicle.Name,
+                            categoryName = categoryName,
+                            communityName = communityName,
+                            price = vehicle.Price,
+                            status = vehicle.Status.ToString()
+                        }
+                    });
+                }
+
+                return Json(new { success = false, message = "Dữ liệu cập nhật không hợp lệ!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi cập nhật xe ID: {Id}", id);
+                return Json(new { success = false, message = "Lỗi khi cập nhật: " + ex.Message });
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var vehicle = await _context.Vehicles.FindAsync(id);
-            if (vehicle != null)
+            try
             {
-                _context.Vehicles.Remove(vehicle);
-                await _context.SaveChangesAsync();
-                return Json(new { success = true, message = "Xóa phương tiện thành công!" });
+                var vehicle = await _context.Vehicles
+                    .Include(v => v.Images)
+                    .FirstOrDefaultAsync(v => v.Id == id);
+
+                if (vehicle != null)
+                {
+                    if (vehicle.Images != null && vehicle.Images.Any())
+                    {
+                        _context.VehicleImages.RemoveRange(vehicle.Images);
+                    }
+
+                    _context.Vehicles.Remove(vehicle);
+                    await _context.SaveChangesAsync();
+
+                    return Json(new { success = true, message = "Xóa phương tiện thành công!" });
+                }
+
+                return Json(new { success = false, message = "Không tìm thấy xe để xóa!" });
             }
-            return Json(new { success = false, message = "Không tìm thấy xe để xóa!" });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xóa xe ID: {Id}", id);
+                return Json(new { success = false, message = "Không thể xóa phương tiện vì đang có dữ liệu liên quan!" });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetVehicleImages(int vehicleId)
+        {
+            try
+            {
+                var images = await _context.VehicleImages
+                    .Where(img => img.VehicleId == vehicleId)
+                    .OrderByDescending(img => img.IsPrimary)
+                    .Select(img => new
+                    {
+                        id = img.Id,
+                        imageUrl = img.ImageUrl,
+                        isPrimary = img.IsPrimary
+                    })
+                    .ToListAsync();
+
+                return Json(new { success = true, images = images });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy ảnh xe ID: {VehicleId}", vehicleId);
+                return Json(new { success = false, images = new object[0] });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadMoreImage(int vehicleId, IFormFile? imageFile)
+        {
+            try
+            {
+                if (imageFile == null || imageFile.Length == 0)
+                {
+                    return Json(new { success = false, message = "Vui lòng chọn file ảnh hợp lệ!" });
+                }
+
+                string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "vehicles");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                bool hasImages = await _context.VehicleImages.AnyAsync(i => i.VehicleId == vehicleId);
+
+                var newImg = new VehicleImage
+                {
+                    VehicleId = vehicleId,
+                    ImageUrl = "/uploads/vehicles/" + uniqueFileName,
+                    IsPrimary = !hasImages
+                };
+                _context.VehicleImages.Add(newImg);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, image = newImg });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tải thêm ảnh cho xe ID: {VehicleId}", vehicleId);
+                return Json(new { success = false, message = "Lỗi khi lưu ảnh: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SetPrimaryImage(int imageId, int vehicleId)
+        {
+            try
+            {
+                var images = await _context.VehicleImages.Where(i => i.VehicleId == vehicleId).ToListAsync();
+                foreach (var img in images)
+                {
+                    img.IsPrimary = (img.Id == imageId);
+                }
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi đặt ảnh chính ID: {ImageId}", imageId);
+                return Json(new { success = false, message = "Lỗi hệ thống!" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteImage(int imageId)
+        {
+            try
+            {
+                var img = await _context.VehicleImages.FindAsync(imageId);
+                if (img != null)
+                {
+                    _context.VehicleImages.Remove(img);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true });
+                }
+                return Json(new { success = false, message = "Không tìm thấy ảnh!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xóa ảnh ID: {ImageId}", imageId);
+                return Json(new { success = false, message = "Lỗi khi xóa ảnh!" });
+            }
         }
     }
 }

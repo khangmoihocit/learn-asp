@@ -9,9 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light">
-    <!-- Navbar trên cùng -->
     <nav class="navbar navbar-dark bg-dark px-3 shadow-sm sticky-top">
-        <a class="navbar-brand fw-bold" style="font-size: 14px;" asp-area="Admin" asp-controller="VehicleCategory" asp-action="Index">
+        <a class="navbar-brand fw-bold" asp-area="Admin" asp-controller="Vehicle" asp-action="Index">
             <i class="bi bi-speedometer2 me-2"></i>ADMIN DASHBOARD
         </a>
         <div class="d-flex align-items-center">
@@ -24,24 +23,23 @@
 
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar bên trái -->
             <nav class="col-md-3 col-lg-2 d-md-block bg-white sidebar py-4 border-end min-vh-100">
                 <div class="position-sticky">
-                    <h6 class="sidebar-heading px-3 text-muted text-uppercase small fw-bold mb-3">Quản lý phương tiện</h6>
+                    <h6 class="sidebar-heading px-3 text-muted text-uppercase small fw-bold mb-3">Quản lý hệ thống</h6>
                     <ul class="nav flex-column gap-1">
                         <li class="nav-item">
-                            <a class="nav-link active rounded px-3 text-dark fw-semibold bg-light" asp-area="Admin" asp-controller="VehicleCategory" asp-action="Index">
-                                <i class="bi bi-tags me-2 text-primary"></i>Quản lý danh mục
+                            <a class="nav-link rounded px-3 text-dark fw-semibold" asp-area="Admin" asp-controller="Vehicle" asp-action="Index">
+                                <i class="bi bi-car-front me-2 text-primary"></i>Quản lý phương tiện
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active rounded px-3 text-dark fw-semibold bg-light" asp-area="Admin" asp-controller="Community" asp-action="Index">
-                                <i class="bi bi-tags me-2 text-primary"></i>Quản lý dân cư
+                            <a class="nav-link rounded px-3 text-dark fw-semibold" asp-area="Admin" asp-controller="VehicleCategory" asp-action="Index">
+                                <i class="bi bi-tags me-2 text-warning"></i>Loại phương tiện
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link rounded px-3 text-secondary" asp-area="Admin" asp-controller="Vehicle" asp-action="Index">
-                                <i class="bi bi-car-front me-2"></i>Quản lý phương tiện
+                            <a class="nav-link rounded px-3 text-dark fw-semibold" asp-area="Admin" asp-controller="Community" asp-action="Index">
+                                <i class="bi bi-buildings me-2 text-success"></i>Khu dân cư
                             </a>
                         </li>
                     </ul>
