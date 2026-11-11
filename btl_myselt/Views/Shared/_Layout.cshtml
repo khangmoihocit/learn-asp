@@ -1,47 +1,57 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - btl_myselt</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - Chia sẻ phương tiện nội khu</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/btl_myselt.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">btl_myselt</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-0">
+            <div class="container">
+                <a class="navbar-brand fw-bold text-primary fs-4" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-car-front-fill me-2"></i>NeighborRide
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link fw-semibold" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-controller="Vehicle" asp-action="Index">Tìm phương tiện</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/#howItWorksSection">Cách hoạt động</a>
                         </li>
                     </ul>
+                    <div class="d-flex align-items-center gap-2">
+                        <a asp-area="Admin" asp-controller="Vehicle" asp-action="Index" class="btn btn-outline-primary btn-sm fw-semibold">
+                            <i class="bi bi-shield-lock me-1"></i>Khu vực Quản trị
+                        </a>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - btl_myselt - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <h5 class="fw-bold mb-1"><i class="bi bi-car-front-fill me-2 text-primary"></i>NeighborRide</h5>
+            <p class="small text-secondary mb-2">Nền tảng chia sẻ và cho thuê phương tiện văn minh nội khu dân cư</p>
+            <small class="text-secondary">&copy; 2026 - NeighborRide. Bảo lưu mọi quyền.</small>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

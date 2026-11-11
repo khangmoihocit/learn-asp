@@ -1,0 +1,283 @@
+@model btl_myselt.Models.Entities.Vehicle
+@using btl_myselt.Models.Entities
+@using btl_myselt.Models.Enums
+
+@{
+    ViewData["Title"] = Model.Name + " - Chi tiết phương tiện";
+    var reviews = ViewBag.Reviews as List<Review> ?? new List<Review>();
+    var avgRating = (double)(ViewBag.AvgRating ?? 5.0);
+    var primaryImg = Model.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? "/images/default-vehicle.png";
+    var defaultStart = DateTime.Now.AddDays(1).ToString("yyyy-MM-ddT08:00");
+    var defaultEnd = DateTime.Now.AddDays(2).ToString("yyyy-MM-ddT18:00");
+}
+
+<div class="bg-light py-3 border-bottom mb-4">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 small">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Vehicle" asp-action="Index" class="text-decoration-none">Tìm phương tiện</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center justify-content-between">
+            <h3 class="fw-bold mb-0">@Model.Name</h3>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-3 mb-4">
+                <img id="mainVehicleImg" src="@primaryImg" class="rounded w-100 mb-3" style="height: 420px; object-fit: cover;" onerror="this.src='https://placehold.co/800x420?text=Xe'" />
+                
+                @if (Model.Images != null && Model.Images.Count > 1)
+                {
+                    <div class="d-flex gap-2 overflow-auto pb-2">
+                        @foreach (var img in Model.Images)
+                        {
+                            <img src="@img.ImageUrl" class="rounded border" style="width: 80px; height: 60px; object-fit: cover; cursor: pointer;" onclick="$('#mainVehicleImg').attr('src', '@img.ImageUrl')" />
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="card border-0 shadow-sm p-4 mb-4">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge bg-dark fs-6">@(Model.Category?.Name ?? "Xe")</span>
+                    @if (Model.ShareType == ShareType.Free)
+                    {
+                        <span class="badge bg-success fs-6">Miễn phí sử dụng</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark fs-6">Cho thuê</span>
+                    }
+                    <span class="badge bg-info text-dark fs-6">Sẵn sàng nhận xe</span>
+                </div>
+
+                <h4 class="fw-bold mb-3">Thông số & Tình trạng xe</h4>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded">
+                            <span class="text-muted small d-block">Tình trạng thực tế</span>
+                            <strong class="text-dark">@(string.IsNullOrEmpty(Model.Condition) ? "Xe hoạt động tốt" : Model.Condition)</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded">
+                            <span class="text-muted small d-block">Khu vực bàn giao</span>
+                            <strong class="text-dark">@(Model.Community?.Name ?? "Nội khu") (@(Model.Community?.Address ?? ""))</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-2">Mô tả chi tiết từ chủ xe</h5>
+                <p class="text-secondary mb-0" style="white-space: pre-line;">
+                    @(string.IsNullOrEmpty(Model.Description) ? "Chủ xe chưa thêm mô tả chi tiết." : Model.Description)
+                </p>
+            </div>
+
+            <div class="card border-0 shadow-sm p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Đánh giá từ người thuê (@reviews.Count)</h5>
+                    <div class="text-warning fw-bold fs-5">
+                        <i class="bi bi-star-fill text-warning"></i> @avgRating.ToString("0.0") <span class="text-muted small fw-normal">/ 5.0</span>
+                    </div>
+                </div>
+
+                @if (reviews.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var rev in reviews)
+                        {
+                            <div class="list-group-item px-0 py-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-weight: bold;">
+                                            @(rev.Reviewer?.FullName?.Substring(0, 1) ?? "U")
+                                        </div>
+                                        <strong class="text-dark">@(rev.Reviewer?.FullName ?? "Cư dân ẩn danh")</strong>
+                                    </div>
+                                    <small class="text-muted">@rev.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                                <div class="text-warning small mb-1">
+                                    @for (int s = 1; s <= 5; s++)
+                                    {
+                                        <i class="bi @(s <= rev.Rating ? "bi-star-fill" : "bi-star")"></i>
+                                    }
+                                </div>
+                                <p class="text-secondary small mb-0">@rev.Comment</p>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted bg-light rounded">
+                        <i class="bi bi-chat-heart fs-3 d-block mb-1 text-secondary"></i>
+                        <p class="small mb-0">Chưa có đánh giá nào cho xe này. Hãy là người đầu tiên trải nghiệm và để lại đánh giá!</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4 mb-4">
+                <span class="text-muted small">Chi phí sử dụng</span>
+                <div class="text-danger fw-bold fs-3 mb-2">
+                    @(Model.ShareType == ShareType.Free ? "0 đ (Miễn phí)" : Model.Price.ToString("N0") + " đ / ngày")
+                </div>
+                <hr />
+
+                <h5 class="fw-bold mb-3"><i class="bi bi-calendar2-check text-primary me-2"></i>Đặt thuê xe ngay</h5>
+
+                <div id="bookingAlert" class="alert d-none small"></div>
+
+                <form id="bookingForm" onsubmit="event.preventDefault(); submitBooking();">
+                    <input type="hidden" name="vehicleId" id="vehicleId" value="@Model.Id" />
+                    <input type="hidden" id="vehiclePrice" value="@Model.Price" />
+                    <input type="hidden" id="isFree" value="@(Model.ShareType == ShareType.Free ? "true" : "false")" />
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Thời gian nhận xe</label>
+                        <input type="datetime-local" name="startAt" id="startAt" class="form-control" value="@defaultStart" required onchange="calculateFee()" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Thời gian trả xe</label>
+                        <input type="datetime-local" name="endAt" id="endAt" class="form-control" value="@defaultEnd" required onchange="calculateFee()" />
+                    </div>
+
+                    <div class="bg-light p-3 rounded mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="text-muted">Thời gian thuê:</span>
+                            <strong id="rentalDays">1 ngày</strong>
+                        </div>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-muted">Tổng phí ước tính:</span>
+                            <strong class="text-primary fs-6" id="totalFee">0 đ</strong>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSubmitBooking" class="btn btn-primary w-100 fw-semibold py-2">
+                        <i class="bi bi-send-check me-1"></i>Xác nhận đặt xe
+                    </button>
+                </form>
+            </div>
+
+            <div class="card border-0 shadow-sm p-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-shield-check text-success me-2"></i>Thông tin chủ xe</h6>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; font-size: 1.2rem;">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div>
+                        <strong class="d-block text-dark">@(Model.Owner?.FullName ?? "Chủ xe")</strong>
+                        <span class="text-muted small">Cư dân @(Model.Community?.Name ?? "nội khu")</span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded small mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Hotline:</span>
+                        <strong class="text-primary">@(Model.Owner?.PhoneNumber ?? "—")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Địa chỉ:</span>
+                        <span class="text-truncate" style="max-width: 180px;">@(Model.Community?.Address ?? "—")</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-info py-2 px-3 small mb-0">
+                    <i class="bi bi-info-circle me-1"></i>Vui lòng mang theo CMND/CCCD hoặc thẻ cư dân khi tới nhận xe.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            calculateFee();
+        });
+
+        // Tính toán số ngày và tiền phí thuê xe theo thời gian nhận/trả
+        function calculateFee() {
+            var start = new Date($('#startAt').val());
+            var end = new Date($('#endAt').val());
+
+            if (isNaN(start.getTime()) || isNaN(end.getTime()) || start >= end) {
+                $('#rentalDays').text('Không hợp lệ');
+                $('#totalFee').text('0 đ');
+                return;
+            }
+
+            var diffHours = (end - start) / (1000 * 60 * 60);
+            var days = Math.ceil(diffHours / 24);
+            if (days < 1) days = 1;
+
+            $('#rentalDays').text(days + ' ngày');
+
+            var isFree = $('#isFree').val() === 'true';
+            if (isFree) {
+                $('#totalFee').text('0 đ (Miễn phí)');
+            } else {
+                var price = parseFloat($('#vehiclePrice').val()) || 0;
+                var total = days * price;
+                $('#totalFee').text(total.toLocaleString() + ' đ');
+            }
+        }
+
+        // Gửi yêu cầu đặt thuê xe qua AJAX
+        function submitBooking() {
+            var startVal = $('#startAt').val();
+            var endVal = $('#endAt').val();
+
+            if (!startVal || !endVal) {
+                showAlert('danger', 'Vui lòng chọn thời gian nhận và trả xe.');
+                return;
+            }
+
+            if (new Date(startVal) >= new Date(endVal)) {
+                showAlert('danger', 'Thời gian trả xe phải sau thời gian nhận xe!');
+                return;
+            }
+
+            var postData = {
+                vehicleId: $('#vehicleId').val(),
+                startAt: startVal,
+                endAt: endVal
+            };
+
+            $('#btnSubmitBooking').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Đang xử lý...');
+
+            $.post('/Vehicle/Book', postData, function (res) {
+                $('#btnSubmitBooking').prop('disabled', false).html('<i class="bi bi-send-check me-1"></i>Xác nhận đặt xe');
+
+                if (res.success) {
+                    showAlert('success', res.message);
+                    $('#bookingForm input').prop('disabled', true);
+                    $('#btnSubmitBooking').replaceWith('<a href="/Vehicle" class="btn btn-success w-100 fw-semibold"><i class="bi bi-check-circle me-1"></i>Đặt xe hoàn tất - Xem thêm xe khác</a>');
+                } else {
+                    showAlert('danger', res.message);
+                }
+            }).fail(function () {
+                $('#btnSubmitBooking').prop('disabled', false).html('<i class="bi bi-send-check me-1"></i>Xác nhận đặt xe');
+                showAlert('danger', 'Đã xảy ra lỗi khi kết nối tới máy chủ. Vui lòng thử lại sau.');
+            });
+        }
+
+        function showAlert(type, message) {
+            $('#bookingAlert')
+                .removeClass('d-none alert-success alert-danger')
+                .addClass('alert-' + type)
+                .html(message);
+        }
+    </script>
+}

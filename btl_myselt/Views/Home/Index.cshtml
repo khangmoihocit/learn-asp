@@ -1,8 +1,51 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<btl_myselt.Models.Entities.Vehicle>
+
+@{
+    ViewData["Title"] = "Trang chủ - Chia sẻ phương tiện nội khu";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<partial name="_HeroBanner" />
+<partial name="_Features" />
+<partial name="_VehicleList" model="Model" />
+<partial name="_HowItWorks" />
+<partial name="_DetailModal" />
+
+@section Scripts {
+    <script>
+        function openDetail(id) {
+            $.get('/Home/GetVehicleDetails/' + id, function (res) {
+                if (res.success) {
+                    var v = res.data;
+                    $('#detailName').text(v.name);
+                    $('#detailPrice').text(v.shareType === 'Miễn phí' ? '0 đ / ngày (Miễn phí)' : Number(v.price).toLocaleString() + ' đ / ngày');
+                    $('#detailCategory').text(v.categoryName);
+                    $('#detailCommunity').text(v.communityName + ' (' + v.communityAddress + ')');
+                    $('#detailOwner').text(v.ownerName);
+                    $('#detailPhone').text(v.ownerPhone);
+                    $('#detailShareType').text(v.shareType);
+                    $('#detailCondition').text(v.condition);
+                    $('#detailDescription').text(v.description);
+                    $('#homeDetailPageBtn').attr('href', '/Vehicle/Details/' + v.id);
+
+                    if (v.images && v.images.length > 0) {
+                        var pri = v.images.find(function (i) { return i.isPrimary; }) || v.images[0];
+                        $('#detailImg').attr('src', pri.imageUrl);
+
+                        var thumbs = '';
+                        v.images.forEach(function (img) {
+                            thumbs += `<img src="${img.imageUrl}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;" onclick="$('#detailImg').attr('src', '${img.imageUrl}')" />`;
+                        });
+                        $('#detailThumbnails').html(thumbs);
+                    } else {
+                        $('#detailImg').attr('src', '/images/default-vehicle.png');
+                        $('#detailThumbnails').html('');
+                    }
+
+                    $('#detailModal').modal('show');
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+    </script>
+}

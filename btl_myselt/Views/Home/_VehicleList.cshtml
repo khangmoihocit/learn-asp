@@ -1,0 +1,69 @@
+@model IEnumerable<btl_myselt.Models.Entities.Vehicle>
+@using btl_myselt.Models.Enums
+
+<div class="py-5" id="vehicleSection">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Phương tiện sẵn sàng</h3>
+                <p class="text-muted small mb-0">Chọn phương tiện phù hợp với nhu cầu đi lại của bạn</p>
+            </div>
+            <span class="badge bg-primary fs-6">@((Model != null ? Model.Count() : 0)) phương tiện</span>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="row g-4">
+                @foreach (var item in Model)
+                {
+                    var primaryImg = item.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? "/images/default-vehicle.png";
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="position-relative">
+                                <img src="@primaryImg" class="card-img-top" style="height: 180px; object-fit: cover;" onerror="this.src='https://placehold.co/300x180?text=Xe'" />
+                                <span class="badge bg-dark position-absolute top-0 start-0 m-2">@(item.Category?.Name ?? "Xe")</span>
+                                @if (item.ShareType == ShareType.Free)
+                                {
+                                    <span class="badge bg-success position-absolute top-0 end-0 m-2">Miễn phí</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Cho thuê</span>
+                                }
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title fw-bold text-dark text-truncate mb-1" title="@item.Name">@item.Name</h5>
+                                <div class="text-primary fw-bold fs-5 mb-2">
+                                    @(item.ShareType == ShareType.Free ? "0 đ / ngày" : item.Price.ToString("N0") + " đ / ngày")
+                                </div>
+                                <p class="card-text text-muted small mb-1 text-truncate">
+                                    <i class="bi bi-geo-alt text-danger me-1"></i>@(item.Community?.Name ?? "Khu dân cư")
+                                </p>
+                                <p class="card-text text-muted small mb-3 text-truncate">
+                                    <i class="bi bi-person me-1"></i>@(item.Owner?.FullName ?? "Chủ xe")
+                                </p>
+                                <div class="mt-auto d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm flex-fill fw-semibold" onclick="openDetail(@item.Id)">
+                                        <i class="bi bi-eye me-1"></i>Xem nhanh
+                                    </button>
+                                    <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm flex-fill fw-semibold">
+                                        <i class="bi bi-calendar-check me-1"></i>Chi tiết
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-car-front fs-1 d-block mb-2 text-secondary"></i>
+                <h5>Không tìm thấy phương tiện nào phù hợp!</h5>
+                <p class="small">Hãy thử chọn lại từ khóa hoặc xóa bộ lọc.</p>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Xem tất cả xe</a>
+            </div>
+        }
+    </div>
+</div>

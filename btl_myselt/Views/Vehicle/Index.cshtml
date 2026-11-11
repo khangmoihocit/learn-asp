@@ -1,0 +1,225 @@
+@model IEnumerable<btl_myselt.Models.Entities.Vehicle>
+@using btl_myselt.Models.Entities
+@using btl_myselt.Models.Enums
+
+@{
+    ViewData["Title"] = "Tìm phương tiện";
+    var categories = ViewBag.Categories as List<VehicleCategory> ?? new List<VehicleCategory>();
+    var communities = ViewBag.Communities as List<Community> ?? new List<Community>();
+    var currentKeyword = ViewBag.Keyword as string ?? "";
+    var selectedCategory = ViewBag.SelectedCategory as int? ?? 0;
+    var selectedCommunity = ViewBag.SelectedCommunity as int? ?? 0;
+    var selectedShareType = ViewBag.SelectedShareType as ShareType?;
+    var selectedSort = ViewBag.SelectedSort as string ?? "";
+}
+
+<div class="bg-light py-3 border-bottom mb-4">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 small">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Tìm phương tiện</li>
+            </ol>
+        </nav>
+        <h3 class="fw-bold mb-1">Tìm kiếm phương tiện nội khu</h3>
+        <p class="text-secondary small mb-0">Duyệt và thuê các phương tiện sẵn có từ cộng đồng cư dân với chi phí tối ưu.</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <form id="filterForm" onsubmit="event.preventDefault(); loadVehicles();" class="card shadow-sm p-3 border-0 bg-light mb-4">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-secondary mb-1">Từ khóa</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="keyword" id="filterKeyword" class="form-control" value="@currentKeyword" placeholder="Tên xe, địa chỉ..." oninput="loadVehiclesDebounced()" />
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-secondary mb-1">Loại xe</label>
+                <select name="categoryId" id="filterCategory" class="form-select" onchange="syncCategoryPill(); loadVehicles();">
+                    <option value="0">Tất cả loại xe</option>
+                    @foreach (var c in categories)
+                    {
+                        <!option value="@c.Id" @(selectedCategory == c.Id ? "selected" : "")>@c.Name</!option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-secondary mb-1">Khu dân cư</label>
+                <select name="communityId" id="filterCommunity" class="form-select" onchange="loadVehicles()">
+                    <option value="0">Tất cả khu vực</option>
+                    @foreach (var com in communities)
+                    {
+                        <!option value="@com.Id" @(selectedCommunity == com.Id ? "selected" : "")>@com.Name</!option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-secondary mb-1">Hình thức</label>
+                <select name="shareType" id="filterShareType" class="form-select" onchange="loadVehicles()">
+                    <option value="">Tất cả</option>
+                    <!option value="Rental" @(selectedShareType == ShareType.Rental ? "selected" : "")>Cho thuê</!option>
+                    <!option value="Free" @(selectedShareType == ShareType.Free ? "selected" : "")>Miễn phí</!option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-1 align-items-end" style="margin-top: 24px;">
+                <button type="button" class="btn btn-primary w-100 fw-semibold" onclick="loadVehicles()">
+                    <i class="bi bi-funnel me-1"></i>Lọc
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="resetFilters()" title="Đặt lại bộ lọc">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-1 mt-3 overflow-auto pb-1">
+            <span class="small text-secondary fw-semibold me-2 text-nowrap">Chọn nhanh:</span>
+            <button type="button" class="btn btn-sm cat-pill @(selectedCategory == 0 ? "btn-primary" : "btn-outline-secondary") rounded-pill px-3" id="cat-pill-0" onclick="filterCategory(0)">Tất cả</button>
+            @foreach (var c in categories)
+            {
+                <button type="button" class="btn btn-sm cat-pill @(selectedCategory == c.Id ? "btn-primary" : "btn-outline-secondary") rounded-pill px-3 text-nowrap" id="cat-pill-@c.Id" onclick="filterCategory(@c.Id)">@c.Name</button>
+            }
+        </div>
+    </form>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Danh sách phương tiện</h5>
+        <div class="d-flex align-items-center">
+            <label class="small text-secondary me-2 fw-semibold text-nowrap">Sắp xếp:</label>
+            <select id="filterSort" class="form-select form-select-sm" style="width: 170px;" onchange="loadVehicles()">
+                <!option value="" @(string.IsNullOrEmpty(selectedSort) ? "selected" : "")>Mới nhất</!option>
+                <!option value="price_asc" @(selectedSort == "price_asc" ? "selected" : "")>Giá: Thấp đến cao</!option>
+                <!option value="price_desc" @(selectedSort == "price_desc" ? "selected" : "")>Giá: Cao đến thấp</!option>
+                <!option value="name" @(selectedSort == "name" ? "selected" : "")>Tên A-Z</!option>
+            </select>
+        </div>
+    </div>
+
+    <div id="vehicleGridContainer">
+        <partial name="_VehicleGrid" model="Model" />
+    </div>
+</div>
+
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-info-circle me-2"></i>Xem nhanh phương tiện</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 row g-3">
+                <div class="col-md-5">
+                    <img id="detailImg" src="" class="img-fluid rounded border mb-2" style="width: 100%; height: 220px; object-fit: cover;" onerror="this.src='https://placehold.co/300x220?text=No+Image'" />
+                    <div id="detailThumbnails" class="d-flex gap-2 overflow-auto"></div>
+                </div>
+                <div class="col-md-7">
+                    <h4 id="detailName" class="text-primary fw-bold mb-2"></h4>
+                    <h5 id="detailPrice" class="text-danger fw-bold mb-3"></h5>
+                    <ul class="list-group list-group-flush small mb-3">
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Loại xe:</span><strong id="detailCategory"></strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Khu dân cư:</span><strong id="detailCommunity"></strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Chủ sở hữu:</span><span id="detailOwner" class="text-dark fw-semibold"></span></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Số điện thoại:</span><span id="detailPhone" class="text-primary fw-bold"></span></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Hình thức:</span><span id="detailShareType"></span></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Tình trạng:</span><span id="detailCondition"></span></li>
+                    </ul>
+                    <div class="bg-light p-2 rounded small" id="detailDescription"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <a id="detailPageBtn" href="#" class="btn btn-primary fw-semibold">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>Trang chi tiết & Đặt xe
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var debounceTimer;
+
+        // Lọc xe qua AJAX mà không reload trang
+        function loadVehicles() {
+            var query = $('#filterForm').serialize() + '&sortBy=' + $('#filterSort').val();
+            $.get('/Vehicle/GetGrid?' + query, function (html) {
+                $('#vehicleGridContainer').html(html);
+            });
+        }
+
+        // Tự động tìm kiếm khi gõ phím sau 300ms
+        function loadVehiclesDebounced() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(loadVehicles, 300);
+        }
+
+        // Chọn nhanh danh mục qua pills
+        function filterCategory(catId) {
+            $('#filterCategory').val(catId);
+            syncCategoryPill();
+            loadVehicles();
+        }
+
+        // Đồng bộ trạng thái active của các nút chọn nhanh
+        function syncCategoryPill() {
+            var currentId = $('#filterCategory').val();
+            $('.cat-pill').removeClass('btn-primary').addClass('btn-outline-secondary');
+            $('#cat-pill-' + currentId).removeClass('btn-outline-secondary').addClass('btn-primary');
+        }
+
+        // Đặt lại toàn bộ bộ lọc
+        function resetFilters() {
+            $('#filterKeyword').val('');
+            $('#filterCategory').val('0');
+            $('#filterCommunity').val('0');
+            $('#filterShareType').val('');
+            $('#filterSort').val('');
+            syncCategoryPill();
+            loadVehicles();
+        }
+
+        // Mở modal xem nhanh thông tin xe
+        function openQuickModal(id) {
+            $.get('/Vehicle/GetDetails/' + id, function (res) {
+                if (res.success) {
+                    var v = res.data;
+                    $('#detailName').text(v.name);
+                    $('#detailPrice').text(v.shareType === 'Miễn phí' ? '0 đ / ngày (Miễn phí)' : Number(v.price).toLocaleString() + ' đ / ngày');
+                    $('#detailCategory').text(v.categoryName);
+                    $('#detailCommunity').text(v.communityName + ' (' + v.communityAddress + ')');
+                    $('#detailOwner').text(v.ownerName);
+                    $('#detailPhone').text(v.ownerPhone);
+                    $('#detailShareType').text(v.shareType);
+                    $('#detailCondition').text(v.condition);
+                    $('#detailDescription').text(v.description);
+                    $('#detailPageBtn').attr('href', '/Vehicle/Details/' + v.id);
+
+                    if (v.images && v.images.length > 0) {
+                        var pri = v.images.find(function (i) { return i.isPrimary; }) || v.images[0];
+                        $('#detailImg').attr('src', pri.imageUrl);
+
+                        var thumbs = '';
+                        v.images.forEach(function (img) {
+                            thumbs += `<img src="${img.imageUrl}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;" onclick="$('#detailImg').attr('src', '${img.imageUrl}')" />`;
+                        });
+                        $('#detailThumbnails').html(thumbs);
+                    } else {
+                        $('#detailImg').attr('src', '/images/default-vehicle.png');
+                        $('#detailThumbnails').html('');
+                    }
+
+                    $('#detailModal').modal('show');
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+    </script>
+}

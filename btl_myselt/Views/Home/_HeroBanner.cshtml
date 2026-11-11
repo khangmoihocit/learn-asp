@@ -1,0 +1,57 @@
+@using btl_myselt.Models.Entities
+@{
+    var categories = ViewBag.Categories as List<VehicleCategory> ?? new List<VehicleCategory>();
+    var communities = ViewBag.Communities as List<Community> ?? new List<Community>();
+    var currentKeyword = ViewBag.Keyword as string ?? "";
+    var selectedCategory = ViewBag.SelectedCategory as int? ?? 0;
+    var selectedCommunity = ViewBag.SelectedCommunity as int? ?? 0;
+}
+
+<div class="py-5 text-white position-relative" style="background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/hero-bg.jpg') center/cover no-repeat; min-height: 420px;">
+    <div class="container text-center py-4">
+        <h1 class="display-5 fw-bold mb-2">Chia sẻ phương tiện nội khu</h1>
+        <p class="fs-5 mb-4 mx-auto text-light" style="max-width: 650px;">
+            Nền tảng hỗ trợ cư dân chia sẻ và thuê xe ô tô, xe máy văn minh, tiện lợi và an toàn.
+        </p>
+
+        <form method="get" asp-controller="Vehicle" asp-action="Index" class="card shadow p-3 mx-auto text-start border-0 text-dark" style="max-width: 850px; border-radius: 12px;">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Từ khóa</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-secondary"></i></span>
+                        <input type="text" name="keyword" class="form-control border-start-0" value="@currentKeyword" placeholder="Tên xe, địa điểm..." />
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Loại xe</label>
+                    <select name="categoryId" class="form-select">
+                        <option value="0">Tất cả loại xe</option>
+                        @foreach (var cat in categories)
+                        {
+                            <!option value="@cat.Id" @(selectedCategory == cat.Id ? "selected" : "")>@cat.Name</!option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Khu dân cư</label>
+                    <select name="communityId" class="form-select">
+                        <option value="0">Tất cả khu dân cư</option>
+                        @foreach (var com in communities)
+                        {
+                            <!option value="@com.Id" @(selectedCommunity == com.Id ? "selected" : "")>@com.Name</!option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold" style="margin-top: 24px;">
+                        <i class="bi bi-search me-1"></i>Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
