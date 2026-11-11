@@ -5,457 +5,145 @@
     ViewData["Title"] = "Quản lý phương tiện";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold mb-0 text-dark">Danh sách phương tiện</h3>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createVehicleModal">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold mb-0">Danh sách phương tiện</h3>
+    <button type="button" class="btn btn-primary" onclick="openCreate()">
         <i class="bi bi-plus-circle me-1"></i> Thêm xe mới
     </button>
 </div>
 
-<div class="card shadow-sm border-0 rounded-3">
-    <div class="card-body p-0">
-        <table class="table table-hover table-striped align-middle mb-0" id="vehicleTable">
-            <thead class="table-dark">
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th style="width: 70px;">Ảnh</th>
+            <th>Tên xe</th>
+            <th>Loại xe</th>
+            <th>Khu dân cư</th>
+            <th>Chủ sở hữu</th>
+            <th>Hình thức</th>
+            <th>Giá thuê/ngày</th>
+            <th>Trạng thái</th>
+            <th class="text-center" style="width: 170px;">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                var primaryImg = item.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? "/images/default-vehicle.png";
                 <tr>
-                    <th style="width: 70px;">Ảnh</th>
-                    <th>Tên xe</th>
-                    <th>Loại xe</th>
-                    <th>Khu dân cư</th>
-                    <th>Chủ sở hữu</th>
-                    <th>Hình thức</th>
-                    <th>Giá thuê / ngày</th>
-                    <th>Trạng thái</th>
-                    <th class="text-center" style="width: 190px;">Thao tác</th>
+                    <td>
+                        <img src="@primaryImg" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.src='https://placehold.co/50x50?text=Xe'" />
+                    </td>
+                    <td class="fw-bold text-primary">@item.Name</td>
+                    <td>@(item.Category?.Name ?? "—")</td>
+                    <td>@(item.Community?.Name ?? "—")</td>
+                    <td>@(item.Owner?.FullName ?? "—")</td>
+                    <td>
+                        @if (item.ShareType == ShareType.Free)
+                        {
+                            <span class="badge bg-info text-dark">Miễn phí</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Cho thuê</span>
+                        }
+                    </td>
+                    <td class="text-danger fw-bold">@item.Price.ToString("N0") đ</td>
+                    <td>
+                        @switch (item.Status)
+                        {
+                            case VehicleStatus.Available:
+                                <span class="badge bg-success">Sẵn sàng</span>
+                                break;
+                            case VehicleStatus.Rented:
+                                <span class="badge bg-warning text-dark">Đang thuê</span>
+                                break;
+                            case VehicleStatus.Maintenance:
+                                <span class="badge bg-danger">Bảo trì</span>
+                                break;
+                            case VehicleStatus.Hidden:
+                                <span class="badge bg-secondary">Tạm ẩn</span>
+                                break;
+                        }
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-info text-white me-1" onclick="openDetail(@item.Id)" title="Chi tiết"><i class="bi bi-eye"></i></button>
+                        <button type="button" class="btn btn-sm btn-secondary text-white me-1" onclick="openImages(@item.Id)" title="Quản lý ảnh"><i class="bi bi-images"></i></button>
+                        <button type="button" class="btn btn-sm btn-warning me-1" onclick="openEdit(@item.Id)" title="Sửa"><i class="bi bi-pencil"></i></button>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="openDelete(@item.Id, '@item.Name')" title="Xóa"><i class="bi bi-trash"></i></button>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
-                {
-                    @foreach (var item in Model)
-                    {
-                        var primaryImg = item.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? "/images/default-vehicle.png";
-                        <tr id="row-@item.Id">
-                            <td>
-                                <img src="@primaryImg" class="rounded cell-image" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.src='https://placehold.co/50x50?text=Xe'" />
-                            </td>
-                            <td class="fw-bold text-primary cell-name">@item.Name</td>
-                            <td class="cell-category">@(item.Category?.Name ?? "—")</td>
-                            <td class="cell-community">@(item.Community?.Name ?? "—")</td>
-                            <td class="cell-owner">@(item.Owner?.FullName ?? "—")</td>
-                            <td class="cell-sharetype">
-                                @if (item.ShareType == ShareType.Free)
-                                {
-                                    <span class="badge bg-info text-dark">Miễn phí</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Cho thuê</span>
-                                }
-                            </td>
-                            <td class="text-danger fw-semibold cell-price">@item.Price.ToString("N0") đ</td>
-                            <td class="cell-status">
-                                @switch (item.Status)
-                                {
-                                    case VehicleStatus.Available:
-                                        <span class="badge bg-success">Sẵn sàng</span>
-                                        break;
-                                    case VehicleStatus.Rented:
-                                        <span class="badge bg-warning text-dark">Đang thuê</span>
-                                        break;
-                                    case VehicleStatus.Maintenance:
-                                        <span class="badge bg-danger">Bảo trì</span>
-                                        break;
-                                    case VehicleStatus.Hidden:
-                                        <span class="badge bg-secondary">Tạm ẩn</span>
-                                        break;
-                                }
-                            </td>
-                            <td class="text-center">
-                                <button type="button" class="btn btn-info btn-sm me-1 text-white btn-view-details" data-id="@item.Id" title="Xem chi tiết">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                                <button type="button" class="btn btn-secondary btn-sm me-1 text-white btn-manage-images" data-id="@item.Id" data-name="@item.Name" title="Quản lý ảnh">
-                                    <i class="bi bi-images"></i>
-                                </button>
-                                <button type="button" class="btn btn-warning btn-sm me-1 btn-edit-vehicle" data-id="@item.Id" title="Sửa">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-delete-vehicle" data-id="@item.Id" data-name="@item.Name" title="Xóa">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr id="emptyRow">
-                        <td colspan="9" class="text-center py-4 text-muted">Chưa có phương tiện nào trong hệ thống!</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9" class="text-center py-4 text-muted">Chưa có phương tiện nào trong hệ thống!</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
-<div class="modal fade" id="createVehicleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <form id="createVehicleForm" enctype="multipart/form-data">
-                @Html.AntiForgeryToken()
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold">Thêm phương tiện mới</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Tên xe <span class="text-danger">*</span></label>
-                        <input type="text" name="Name" class="form-control" placeholder="Ví dụ: Honda Vision 2023" required />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Trạng thái xe</label>
-                        <select name="Status" class="form-select" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Loại xe</label>
-                        <select name="CategoryId" class="form-select" asp-items="ViewBag.Categories" required></select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Khu dân cư</label>
-                        <select name="CommunityId" class="form-select" asp-items="ViewBag.Communities" required></select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Chủ sở hữu</label>
-                        <select name="OwnerId" class="form-select" asp-items="ViewBag.Owners" required></select>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Hình thức chia sẻ</label>
-                        <select id="createShareType" name="ShareType" class="form-select" asp-items="Html.GetEnumSelectList<ShareType>()"></select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Giá thuê / 1 ngày (VNĐ)</label>
-                        <input type="number" id="createPrice" name="Price" class="form-control" value="0" min="0" step="1000" required />
-                        <small class="form-text text-muted" id="createPriceNote"></small>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Ảnh xe ban đầu</label>
-                        <input type="file" name="imageFile" class="form-control" accept="image/*" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Tình trạng xe</label>
-                        <input type="text" name="Condition" class="form-control" placeholder="Ví dụ: Mới 98%, phanh ABS" />
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">Mô tả chi tiết</label>
-                        <textarea name="Description" class="form-control" rows="2" placeholder="Thông tin chi tiết về xe, lưu ý khi nhận xe..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary fw-semibold">Lưu phương tiện</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="editVehicleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <form id="editVehicleForm">
-                @Html.AntiForgeryToken()
-                <input type="hidden" id="editVehicleId" name="Id" />
-
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title fw-bold">Chỉnh sửa thông tin xe</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Tên xe <span class="text-danger">*</span></label>
-                        <input type="text" id="editName" name="Name" class="form-control" required />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Trạng thái</label>
-                        <select id="editStatus" name="Status" class="form-select" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Loại xe</label>
-                        <select id="editCategoryId" name="CategoryId" class="form-select" asp-items="ViewBag.Categories"></select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Khu dân cư</label>
-                        <select id="editCommunityId" name="CommunityId" class="form-select" asp-items="ViewBag.Communities"></select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Chủ sở hữu</label>
-                        <select id="editOwnerId" name="OwnerId" class="form-select" asp-items="ViewBag.Owners"></select>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Hình thức chia sẻ</label>
-                        <select id="editShareType" name="ShareType" class="form-select" asp-items="Html.GetEnumSelectList<ShareType>()"></select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Giá thuê / 1 ngày (VNĐ)</label>
-                        <input type="number" id="editPrice" name="Price" class="form-control" required />
-                        <small class="form-text text-muted" id="editPriceNote"></small>
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">Tình trạng xe</label>
-                        <input type="text" id="editCondition" name="Condition" class="form-control" />
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">Mô tả chi tiết</label>
-                        <textarea id="editDesc" name="Description" class="form-control" rows="2"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-warning fw-semibold">Lưu thay đổi</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="vehicleDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold"><i class="bi bi-info-circle me-2"></i>Chi tiết phương tiện</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="row g-4">
-                    <div class="col-md-5">
-                        <img id="detailMainImage" src="" class="img-fluid rounded shadow-sm w-100 mb-2 border" style="height: 230px; object-fit: cover;" onerror="this.src='https://placehold.co/300x230?text=No+Image'" />
-                        <div id="detailThumbnails" class="d-flex gap-2 overflow-auto py-1"></div>
-                    </div>
-                    <div class="col-md-7">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h4 class="fw-bold text-primary mb-0" id="detailName"></h4>
-                            <div class="d-flex gap-1" id="detailBadges"></div>
-                        </div>
-                        <h5 class="text-danger fw-bold mb-3" id="detailPrice"></h5>
-
-                        <ul class="list-group list-group-flush small mb-3">
-                            <li class="list-group-item px-0 d-flex justify-content-between">
-                                <span class="text-muted">Loại phương tiện:</span>
-                                <strong id="detailCategory"></strong>
-                            </li>
-                            <li class="list-group-item px-0 d-flex justify-content-between">
-                                <span class="text-muted">Khu dân cư:</span>
-                                <strong id="detailCommunity"></strong>
-                            </li>
-                            <li class="list-group-item px-0 d-flex justify-content-between">
-                                <span class="text-muted">Chủ phương tiện:</span>
-                                <span id="detailOwner"></span>
-                            </li>
-                            <li class="list-group-item px-0 d-flex justify-content-between">
-                                <span class="text-muted">Tình trạng xe:</span>
-                                <span id="detailCondition"></span>
-                            </li>
-                        </ul>
-
-                        <div class="bg-light p-3 rounded">
-                            <h6 class="fw-bold text-dark mb-1 small">Mô tả:</h6>
-                            <p class="small text-secondary mb-0" id="detailDescription"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="deleteVehicleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title fw-bold">Xác nhận xóa phương tiện</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <p class="fs-5 text-secondary mb-2">Bạn có chắc chắn muốn xóa phương tiện này?</p>
-                <h4 class="fw-bold text-danger mb-3" id="deleteVehicleName"></h4>
-                <small class="text-muted">Hành động này sẽ xóa cả các hình ảnh liên quan của xe.</small>
-            </div>
-            <div class="modal-footer justify-content-center border-0 pt-0">
-                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-danger px-4 fw-semibold" id="btnConfirmDeleteVehicle">Đồng ý Xóa</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="vehicleImagesModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title fw-bold" id="imageModalTitle"><i class="bi bi-images me-2"></i>Quản lý hình ảnh xe</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="uploadMoreImageForm" enctype="multipart/form-data" class="row g-2 mb-4 p-3 bg-light rounded border align-items-center">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" id="imageVehicleId" name="vehicleId" />
-                    <div class="col-md-8">
-                        <input type="file" name="imageFile" class="form-control" accept="image/*" required />
-                    </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-primary w-100 fw-semibold">
-                            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Tải ảnh lên
-                        </button>
-                    </div>
-                </form>
-
-                <div class="row g-3" id="vehicleImagesList"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-            </div>
-        </div>
-    </div>
-</div>
+<partial name="_CreateModal" />
+<partial name="_EditModal" />
+<partial name="_DetailModal" />
+<partial name="_DeleteModal" />
+<partial name="_ImageModal" />
 
 @section Scripts {
     <script>
         var currentVehicleId = 0;
-        var vehicleIdToDelete = 0;
 
-        function getStatusBadge(status) {
-            if (status === 'Available' || status === '0') return '<span class="badge bg-success">Sẵn sàng</span>';
-            if (status === 'Rented' || status === '1') return '<span class="badge bg-warning text-dark">Đang thuê</span>';
-            if (status === 'Maintenance' || status === '2') return '<span class="badge bg-danger">Bảo trì</span>';
-            if (status === 'Hidden' || status === '3') return '<span class="badge bg-secondary">Tạm ẩn</span>';
-            return '<span class="badge bg-secondary">' + status + '</span>';
-        }
-
-        function getShareTypeBadge(shareType) {
-            if (shareType === 'Free' || shareType === '0') return '<span class="badge bg-info text-dark">Miễn phí</span>';
-            return '<span class="badge bg-secondary">Cho thuê</span>';
-        }
-
-        function updatePriceInputState(shareTypeSelect, priceInput, noteElem) {
-            var shareVal = $(shareTypeSelect).val();
-            var isFree = (shareVal === '0' || shareVal === 'Free');
-            var $price = $(priceInput);
-            var $note = $(noteElem);
-
-            if (isFree) {
-                if (Number($price.val()) > 0) {
-                    $price.data('saved-price', $price.val());
-                }
-                $price.val(0);
-                $price.prop('readonly', true);
-                $price.css({
-                    'background-color': '#e9ecef',
-                    'color': '#6c757d',
-                    'cursor': 'not-allowed'
-                });
-                if ($note.length) {
-                    $note.html('<i class="bi bi-lock-fill me-1"></i>Hình thức <strong>Miễn phí</strong>: Giá thuê cố định 0 VNĐ/ngày.');
-                }
+        // Khóa ô giá khi chọn Miễn phí (dùng readonly để form vẫn gửi được giá trị 0 lên server)
+        $('#createShareType').change(function () {
+            if ($(this).val() == '0') {
+                $('#createPrice').val(0).prop('readonly', true).css('background', '#eee');
             } else {
-                $price.prop('readonly', false);
-                $price.css({
-                    'background-color': '#ffffff',
-                    'color': '#212529',
-                    'cursor': 'auto'
-                });
-                var savedPrice = $price.data('saved-price') || 100000;
-                if (Number($price.val()) === 0) {
-                    $price.val(savedPrice);
-                }
-                if ($note.length) {
-                    $note.html('');
-                }
+                $('#createPrice').val(100000).prop('readonly', false).css('background', '#fff');
             }
+        });
+
+        $('#editShareType').change(function () {
+            if ($(this).val() == '0') {
+                $('#editPrice').val(0).prop('readonly', true).css('background', '#eee');
+            } else {
+                $('#editPrice').prop('readonly', false).css('background', '#fff');
+            }
+        });
+
+        // Thêm mới: dùng FormData để upload file ảnh ban đầu
+        function openCreate() {
+            $('#createForm')[0].reset();
+            $('#createPrice').val(0).prop('readonly', true).css('background', '#eee');
+            $('#createModal').modal('show');
         }
 
-        $('#createShareType').on('change', function () {
-            updatePriceInputState('#createShareType', '#createPrice', '#createPriceNote');
-        });
-
-        $('#createVehicleModal').on('show.bs.modal', function () {
-            updatePriceInputState('#createShareType', '#createPrice', '#createPriceNote');
-        });
-
-        $('#editShareType').on('change', function () {
-            updatePriceInputState('#editShareType', '#editPrice', '#editPriceNote');
-        });
-
-        $('#createVehicleForm').submit(function (e) {
+        $('#createForm').submit(function (e) {
             e.preventDefault();
-            var formData = new FormData(this);
-
             $.ajax({
                 url: '/Admin/Vehicle/Create',
                 type: 'POST',
-                data: formData,
+                data: new FormData(this),
                 contentType: false,
                 processData: false,
                 success: function (res) {
                     if (res.success) {
-                        $('#createVehicleModal').modal('hide');
-                        $('#createVehicleForm')[0].reset();
-                        updatePriceInputState('#createShareType', '#createPrice', '#createPriceNote');
-                        $('#emptyRow').remove();
-
-                        var row = `
-                            <tr id="row-${res.data.id}">
-                                <td>
-                                    <img src="${res.data.imageUrl}" class="rounded cell-image" style="width: 50px; height: 50px; object-fit: cover;" />
-                                </td>
-                                <td class="fw-bold text-primary cell-name">${res.data.name}</td>
-                                <td class="cell-category">${res.data.categoryName}</td>
-                                <td class="cell-community">${res.data.communityName}</td>
-                                <td class="cell-owner">${res.data.ownerName}</td>
-                                <td class="cell-sharetype">${getShareTypeBadge(res.data.shareType)}</td>
-                                <td class="text-danger fw-semibold cell-price">${Number(res.data.price).toLocaleString()} đ</td>
-                                <td class="cell-status">${getStatusBadge(res.data.status)}</td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-info btn-sm me-1 text-white btn-view-details" data-id="${res.data.id}" title="Xem chi tiết">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-secondary btn-sm me-1 text-white btn-manage-images" data-id="${res.data.id}" data-name="${res.data.name}" title="Quản lý ảnh">
-                                        <i class="bi bi-images"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-warning btn-sm me-1 btn-edit-vehicle" data-id="${res.data.id}" title="Sửa">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm btn-delete-vehicle" data-id="${res.data.id}" data-name="${res.data.name}" title="Xóa">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>`;
-                        $('#vehicleTable tbody').prepend(row);
+                        location.reload();
                     } else {
                         alert(res.message);
                     }
-                },
-                error: function () {
-                    alert('Lỗi kết nối khi thêm phương tiện!');
                 }
             });
         });
 
-        $(document).on('click', '.btn-edit-vehicle', function () {
-            var id = $(this).data('id');
+        // Sửa xe: gọi GET lấy thông tin điền vào form, submit gửi POST
+        function openEdit(id) {
             $.get('/Admin/Vehicle/GetVehicle/' + id, function (res) {
                 if (res.success) {
                     var v = res.data;
-                    $('#editVehicleId').val(v.id);
+                    $('#editId').val(v.id);
                     $('#editName').val(v.name);
                     $('#editStatus').val(v.status);
                     $('#editCategoryId').val(v.categoryId);
@@ -464,170 +152,118 @@
                     $('#editShareType').val(v.shareType);
                     $('#editPrice').val(v.price);
                     $('#editCondition').val(v.condition);
-                    $('#editDesc').val(v.description);
+                    $('#editDescription').val(v.description);
 
-                    updatePriceInputState('#editShareType', '#editPrice', '#editPriceNote');
+                    if (v.shareType == 0) {
+                        $('#editPrice').prop('readonly', true).css('background', '#eee');
+                    } else {
+                        $('#editPrice').prop('readonly', false).css('background', '#fff');
+                    }
 
-                    $('#editVehicleModal').modal('show');
+                    $('#editModal').modal('show');
                 } else {
                     alert(res.message);
                 }
             });
-        });
+        }
 
-        $('#editVehicleForm').submit(function (e) {
+        $('#editForm').submit(function (e) {
             e.preventDefault();
-            var id = $('#editVehicleId').val();
-
+            var id = $('#editId').val();
             $.ajax({
                 url: '/Admin/Vehicle/Edit/' + id,
                 type: 'POST',
                 data: $(this).serialize(),
                 success: function (res) {
                     if (res.success) {
-                        $('#editVehicleModal').modal('hide');
-
-                        var row = $('#row-' + id);
-                        row.find('.cell-name').text(res.data.name);
-                        row.find('.cell-category').text(res.data.categoryName);
-                        row.find('.cell-community').text(res.data.communityName);
-                        row.find('.cell-owner').text(res.data.ownerName);
-                        row.find('.cell-sharetype').html(getShareTypeBadge(res.data.shareType));
-                        row.find('.cell-price').text(Number(res.data.price).toLocaleString() + ' đ');
-                        row.find('.cell-status').html(getStatusBadge(res.data.status));
+                        location.reload();
                     } else {
                         alert(res.message);
                     }
-                },
-                error: function () {
-                    alert('Lỗi kết nối khi cập nhật phương tiện!');
                 }
             });
         });
 
-        $(document).on('click', '.btn-view-details', function () {
-            var id = $(this).data('id');
-
+        // Xem chi tiết: nạp thông tin xe và hiển thị modal
+        function openDetail(id) {
             $.get('/Admin/Vehicle/GetVehicleDetails/' + id, function (res) {
                 if (res.success) {
                     var v = res.data;
-
                     $('#detailName').text(v.name);
-                    $('#detailPrice').text(Number(v.price).toLocaleString() + ' VNĐ / ngày');
+                    $('#detailPrice').text(Number(v.price).toLocaleString() + ' đ/ngày');
                     $('#detailCategory').text(v.categoryName);
-                    $('#detailCommunity').text(v.communityName + ' (' + v.communityAddress + ')');
-                    $('#detailOwner').html('<strong>' + v.ownerName + '</strong> - SĐT: ' + v.ownerPhone);
-                    $('#detailCondition').text(v.condition);
-                    $('#detailDescription').text(v.description);
+                    $('#detailCommunity').text(v.communityName);
+                    $('#detailOwner').text(v.ownerName + ' (' + v.ownerPhone + ')');
+                    $('#detailShareType').text(v.shareType);
+                    $('#detailStatus').text(v.status);
+                    $('#detailCondition').text(v.condition || 'Bình thường');
+                    $('#detailDescription').text(v.description || 'Không có mô tả');
 
-                    var badges = getStatusBadge(v.status) + ' ' + (v.shareType === 'Miễn phí' ? '<span class="badge bg-info text-dark">Miễn phí</span>' : '<span class="badge bg-secondary">Cho thuê</span>');
-                    $('#detailBadges').html(badges);
+                    var imgUrl = (v.images && v.images.length > 0) ? v.images[0].imageUrl : '/images/default-vehicle.png';
+                    $('#detailImg').attr('src', imgUrl);
 
-                    if (v.images && v.images.length > 0) {
-                        var primary = v.images.find(function (i) { return i.isPrimary; }) || v.images[0];
-                        $('#detailMainImage').attr('src', primary.imageUrl);
-
-                        var thumbs = '';
-                        v.images.forEach(function (img) {
-                            thumbs += `<img src="${img.imageUrl}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;" onclick="$('#detailMainImage').attr('src', '${img.imageUrl}')" />`;
-                        });
-                        $('#detailThumbnails').html(thumbs);
-                    } else {
-                        $('#detailMainImage').attr('src', '/images/default-vehicle.png');
-                        $('#detailThumbnails').html('');
-                    }
-
-                    $('#vehicleDetailsModal').modal('show');
+                    $('#detailModal').modal('show');
                 } else {
                     alert(res.message);
-                }
-            });
-        });
-
-        $(document).on('click', '.btn-delete-vehicle', function () {
-            vehicleIdToDelete = $(this).data('id');
-            var name = $(this).data('name');
-            $('#deleteVehicleName').text('"' + name + '"');
-            $('#deleteVehicleModal').modal('show');
-        });
-
-        $('#btnConfirmDeleteVehicle').click(function () {
-            if (!vehicleIdToDelete) return;
-
-            $.ajax({
-                url: '/Admin/Vehicle/Delete/' + vehicleIdToDelete,
-                type: 'POST',
-                data: {
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function (res) {
-                    if (res.success) {
-                        $('#deleteVehicleModal').modal('hide');
-                        $('#row-' + vehicleIdToDelete).fadeOut(350, function () { $(this).remove(); });
-                        vehicleIdToDelete = 0;
-                    } else {
-                        alert(res.message);
-                    }
-                },
-                error: function () {
-                    alert('Lỗi kết nối khi xóa phương tiện!');
-                }
-            });
-        });
-
-        $(document).on('click', '.btn-manage-images', function () {
-            currentVehicleId = $(this).data('id');
-            var vehicleName = $(this).data('name');
-            $('#imageModalTitle').html('<i class="bi bi-images me-2"></i>Quản lý hình ảnh: ' + vehicleName);
-            $('#imageVehicleId').val(currentVehicleId);
-            loadVehicleImages(currentVehicleId);
-            $('#vehicleImagesModal').modal('show');
-        });
-
-        function loadVehicleImages(vId) {
-            $.get('/Admin/Vehicle/GetVehicleImages?vehicleId=' + vId, function (res) {
-                if (res.success) {
-                    var html = '';
-                    if (res.images.length === 0) {
-                        html = '<div class="col-12 text-center text-muted py-4">Xe này chưa có hình ảnh nào. Hãy chọn file bên trên để tải lên!</div>';
-                    } else {
-                        res.images.forEach(function (img) {
-                            html += `
-                                <div class="col-md-4 col-sm-6" id="img-card-${img.id}">
-                                    <div class="card h-100 shadow-sm border ${img.isPrimary ? 'border-primary border-2' : ''}">
-                                        <img src="${img.imageUrl}" class="card-img-top" style="height: 140px; object-fit: cover;" onerror="this.src='https://placehold.co/150x140?text=Loi+Anh'" />
-                                        <div class="card-body p-2 text-center">
-                                            ${img.isPrimary 
-                                                ? '<span class="badge bg-primary mb-2 d-inline-block"><i class="bi bi-check-circle me-1"></i>Ảnh chính</span>' 
-                                                : `<button type="button" class="btn btn-outline-primary btn-sm w-100 mb-2 btn-set-primary" data-img-id="${img.id}">Đặt làm ảnh chính</button>`
-                                            }
-                                            <button type="button" class="btn btn-outline-danger btn-sm w-100 btn-delete-single-img" data-img-id="${img.id}">
-                                                <i class="bi bi-trash me-1"></i>Xóa ảnh
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>`;
-                        });
-                    }
-                    $('#vehicleImagesList').html(html);
                 }
             });
         }
 
-        $('#uploadMoreImageForm').submit(function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
+        // Xóa xe: xác nhận và gửi POST xóa xe cùng toàn bộ ảnh liên quan
+        function openDelete(id, name) {
+            $('#deleteId').val(id);
+            $('#deleteName').text(name);
+            $('#deleteModal').modal('show');
+        }
 
+        function confirmDelete() {
+            var id = $('#deleteId').val();
+            $.post('/Admin/Vehicle/Delete/' + id, function (res) {
+                if (res.success) {
+                    location.reload();
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+
+        // Quản lý ảnh: tải ảnh phụ, đổi ảnh chính và xóa ảnh riêng lẻ
+        function openImages(id) {
+            currentVehicleId = id;
+            $('#imageVehicleId').val(id);
+            loadImages(id);
+            $('#imageModal').modal('show');
+        }
+
+        function loadImages(vehicleId) {
+            $.get('/Admin/Vehicle/GetVehicleImages?vehicleId=' + vehicleId, function (res) {
+                if (res.success) {
+                    var html = '';
+                    res.images.forEach(function (img) {
+                        html += `
+                            <div class="col-4 text-center">
+                                <img src="${img.imageUrl}" class="rounded mb-2" style="width: 100%; height: 100px; object-fit: cover;">
+                                ${img.isPrimary ? '<span class="badge bg-primary mb-1 d-block">Ảnh chính</span>' : `<button type="button" class="btn btn-sm btn-outline-primary w-100 mb-1" onclick="setPrimary(${img.id})">Đặt ảnh chính</button>`}
+                                <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="removeImage(${img.id})">Xóa</button>
+                            </div>`;
+                    });
+                    $('#imageList').html(html || '<p class="text-center text-muted">Chưa có ảnh</p>');
+                }
+            });
+        }
+
+        $('#uploadImageForm').submit(function (e) {
+            e.preventDefault();
             $.ajax({
                 url: '/Admin/Vehicle/UploadMoreImage',
                 type: 'POST',
-                data: formData,
+                data: new FormData(this),
                 contentType: false,
                 processData: false,
                 success: function (res) {
                     if (res.success) {
-                        $('#uploadMoreImageForm')[0].reset();
-                        loadVehicleImages(currentVehicleId);
+                        $('#uploadImageForm')[0].reset();
+                        loadImages(currentVehicleId);
                     } else {
                         alert(res.message);
                     }
@@ -635,36 +271,17 @@
             });
         });
 
-        $(document).on('click', '.btn-set-primary', function () {
-            var imgId = $(this).data('img-id');
-            $.post('/Admin/Vehicle/SetPrimaryImage', { imageId: imgId, vehicleId: currentVehicleId }, function (res) {
-                if (res.success) {
-                    loadVehicleImages(currentVehicleId);
-                    $.get('/Admin/Vehicle/GetVehicleImages?vehicleId=' + currentVehicleId, function (imgRes) {
-                        var pri = imgRes.images.find(function (i) { return i.isPrimary; });
-                        if (pri) {
-                            $('#row-' + currentVehicleId).find('.cell-image').attr('src', pri.imageUrl);
-                        }
-                    });
-                }
+        function setPrimary(imageId) {
+            $.post('/Admin/Vehicle/SetPrimaryImage', { imageId: imageId, vehicleId: currentVehicleId }, function (res) {
+                if (res.success) loadImages(currentVehicleId);
             });
-        });
+        }
 
-        $(document).on('click', '.btn-delete-single-img', function () {
-            if (!confirm('Bạn có chắc chắn muốn xóa ảnh này không?')) return;
-            var imgId = $(this).data('img-id');
-
-            $.post('/Admin/Vehicle/DeleteImage', { imageId: imgId }, function (res) {
-                if (res.success) {
-                    $('#img-card-' + imgId).fadeOut(300, function () { $(this).remove(); });
-                } else {
-                    alert(res.message);
-                }
+        function removeImage(imageId) {
+            if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+            $.post('/Admin/Vehicle/DeleteImage', { imageId: imageId }, function (res) {
+                if (res.success) loadImages(currentVehicleId);
             });
-        });
-
-        $(document).ready(function () {
-            updatePriceInputState('#createShareType', '#createPrice', '#createPriceNote');
-        });
+        }
     </script>
 }

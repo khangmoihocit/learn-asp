@@ -1,0 +1,63 @@
+<div class="modal fade" id="createModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="createForm" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Thêm phương tiện mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tên xe</label>
+                        <input type="text" name="Name" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Trạng thái xe</label>
+                        <select name="Status" class="form-select" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Loại xe</label>
+                        <select name="CategoryId" class="form-select" asp-items="ViewBag.Categories" required></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Khu dân cư</label>
+                        <select name="CommunityId" class="form-select" asp-items="ViewBag.Communities" required></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Chủ sở hữu</label>
+                        <select name="OwnerId" class="form-select" asp-items="ViewBag.Owners" required></select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Hình thức chia sẻ</label>
+                        <select id="createShareType" name="ShareType" class="form-select" asp-items="Html.GetEnumSelectList<ShareType>()"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Giá thuê / ngày (VNĐ)</label>
+                        <input type="number" id="createPrice" name="Price" class="form-control" value="0" readonly style="background: #eee;" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Ảnh đại diện ban đầu</label>
+                        <input type="file" name="imageFile" class="form-control" accept="image/*" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tình trạng xe</label>
+                        <input type="text" name="Condition" class="form-control" placeholder="Ví dụ: Xe mới 98%" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Mô tả chi tiết</label>
+                        <textarea name="Description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu xe</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

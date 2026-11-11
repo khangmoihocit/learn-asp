@@ -1,0 +1,22 @@
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Quản lý hình ảnh xe</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadImageForm" enctype="multipart/form-data" class="d-flex gap-2 mb-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="imageVehicleId" name="vehicleId" />
+                    <input type="file" name="imageFile" class="form-control" accept="image/*" required />
+                    <button type="submit" class="btn btn-primary text-nowrap">Tải ảnh</button>
+                </form>
+                <div class="row g-3" id="imageList"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
