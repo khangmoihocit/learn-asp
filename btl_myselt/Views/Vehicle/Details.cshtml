@@ -264,6 +264,8 @@
                     showAlert('success', res.message);
                     $('#bookingForm input').prop('disabled', true);
                     $('#btnSubmitBooking').replaceWith('<a href="/Vehicle" class="btn btn-success w-100 fw-semibold"><i class="bi bi-check-circle me-1"></i>Đặt xe hoàn tất - Xem thêm xe khác</a>');
+                } else if (res.requireLogin) {
+                    showAlert('warning', res.message + ' <a href="/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname) + '" class="fw-bold text-dark">Đăng nhập ngay</a>');
                 } else {
                     showAlert('danger', res.message);
                 }

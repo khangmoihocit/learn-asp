@@ -69,7 +69,7 @@ namespace btl_myselt.Controllers
             {
                 redirectUrl = model.ReturnUrl;
             }
-            else if (user.Role == "Admin")
+            else if (user.Role == "ADMIN")
             {
                 redirectUrl = "/Admin/Vehicle";
             }

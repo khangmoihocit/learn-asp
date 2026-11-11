@@ -393,5 +393,18 @@ namespace btl_myselt.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Lỗi khi xóa ảnh!" });
             }
         }
+
+        // Phê duyệt nhanh phương tiện (Chuyển từ Tạm ẩn sang Sẵn sàng)
+        [HttpPost]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var vehicle = await _context.Vehicles.FindAsync(id);
+            if (vehicle == null) return Json(new { success = false, message = "Không tìm thấy xe!" });
+
+            vehicle.Status = VehicleStatus.Available;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Phê duyệt phương tiện thành công! Xe đã sẵn sàng hiển thị trên trang chủ." });
+        }
     }
 }

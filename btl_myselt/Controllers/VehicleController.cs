@@ -1,6 +1,10 @@
 using System;
+using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using btl_myselt.Data;
@@ -12,10 +16,12 @@ namespace btl_myselt.Controllers
     public class VehicleController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public VehicleController(ApplicationDbContext context)
+        public VehicleController(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         // Query lọc xe dùng chung cho cả trang chính và AJAX
@@ -80,7 +86,7 @@ namespace btl_myselt.Controllers
             return View(vehicles);
         }
 
-        // AJAX: Lọc và trả về danh sách thẻ xe (không load lại trang)
+        // AJAX: Lọc và trả về danh sách thẻ xe
         [HttpGet]
         public async Task<IActionResult> GetGrid(string? keyword, int? categoryId, int? communityId, ShareType? shareType, string? sortBy)
         {
@@ -154,10 +160,16 @@ namespace btl_myselt.Controllers
             return View(vehicle);
         }
 
-        // Xử lý gửi yêu cầu thuê xe
+        // Xử lý gửi yêu cầu thuê xe (Yêu cầu đăng nhập: Role USER hoặc Admin)
         [HttpPost]
         public async Task<IActionResult> Book(int vehicleId, DateTime startAt, DateTime endAt)
         {
+            // Kiểm tra đăng nhập
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return Json(new { success = false, requireLogin = true, message = "Vui lòng đăng nhập để thực hiện đặt thuê xe!" });
+            }
+
             if (startAt >= endAt)
             {
                 return Json(new { success = false, message = "Thời gian trả xe phải sau thời gian nhận xe!" });
@@ -169,13 +181,17 @@ namespace btl_myselt.Controllers
                 return Json(new { success = false, message = "Phương tiện không khả dụng để thuê!" });
             }
 
-            // Lấy người thuê mẫu (khác chủ xe)
-            var borrower = await _context.Users.FirstOrDefaultAsync(u => u.Id != vehicle.OwnerId)
-                           ?? await _context.Users.FirstOrDefaultAsync();
-
-            if (borrower == null)
+            // Lấy ID người dùng từ Claims đăng nhập
+            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int borrowerId))
             {
-                return Json(new { success = false, message = "Hệ thống chưa có tài khoản người thuê!" });
+                return Json(new { success = false, requireLogin = true, message = "Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại!" });
+            }
+
+            // Không cho phép tự thuê xe của chính mình
+            if (vehicle.OwnerId == borrowerId)
+            {
+                return Json(new { success = false, message = "Bạn không thể đặt thuê phương tiện do chính mình sở hữu!" });
             }
 
             // Tính số ngày và phí thuê ước tính
@@ -187,7 +203,7 @@ namespace btl_myselt.Controllers
             var booking = new Booking
             {
                 VehicleId = vehicleId,
-                BorrowerId = borrower.Id,
+                BorrowerId = borrowerId,
                 StartAt = startAt,
                 EndAt = endAt,
                 EstimatedFee = fee,
@@ -203,6 +219,86 @@ namespace btl_myselt.Controllers
                 success = true,
                 message = $"Gửi yêu cầu thuê xe thành công! Mã đơn: #{booking.Id}.",
                 bookingId = booking.Id
+            });
+        }
+
+        // ================= GỬI YÊU CẦU CHO THUÊ XE =================
+        [HttpGet]
+        public async Task<IActionResult> RegisterShare()
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Account", new { returnUrl = "/Vehicle/RegisterShare" });
+            }
+
+            ViewBag.Categories = await _context.VehicleCategories.ToListAsync();
+            ViewBag.Communities = await _context.Communities.Where(c => c.IsActive).ToListAsync();
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterShare(Vehicle vehicle, IFormFile? imageFile)
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return Json(new { success = false, message = "Vui lòng đăng nhập trước khi gửi xe!" });
+            }
+
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int ownerId))
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ!" });
+            }
+
+            if (string.IsNullOrWhiteSpace(vehicle.Name))
+            {
+                return Json(new { success = false, message = "Vui lòng nhập tên phương tiện!" });
+            }
+
+            vehicle.OwnerId = ownerId;
+            vehicle.Status = VehicleStatus.Hidden; // Tạm ẩn, chờ Admin phê duyệt
+
+            if (vehicle.ShareType == ShareType.Free)
+            {
+                vehicle.Price = 0;
+            }
+
+            _context.Vehicles.Add(vehicle);
+            await _context.SaveChangesAsync();
+
+            // Lưu ảnh nếu người dùng có tải lên
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "vehicles");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                var vehicleImg = new VehicleImage
+                {
+                    VehicleId = vehicle.Id,
+                    ImageUrl = "/uploads/vehicles/" + uniqueFileName,
+                    IsPrimary = true
+                };
+                _context.VehicleImages.Add(vehicleImg);
+                await _context.SaveChangesAsync();
+            }
+
+            return Json(new
+            {
+                success = true,
+                message = "Gửi yêu cầu đăng xe thành công! Phương tiện đang ở trạng thái chờ Admin phê duyệt trước khi hiển thị công khai.",
+                redirectUrl = "/Vehicle"
             });
         }
     }

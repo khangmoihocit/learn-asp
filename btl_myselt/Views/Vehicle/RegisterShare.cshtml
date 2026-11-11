@@ -1,0 +1,147 @@
+@using btl_myselt.Models.Entities
+@using btl_myselt.Models.Enums
+@{
+    ViewData["Title"] = "Đăng ký cho thuê phương tiện";
+    var categories = ViewBag.Categories as List<VehicleCategory> ?? new List<VehicleCategory>();
+    var communities = ViewBag.Communities as List<Community> ?? new List<Community>();
+}
+
+<div class="bg-light py-3 border-bottom mb-4">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 small">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Vehicle" asp-action="Index" class="text-decoration-none">Phương tiện</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Đăng ký cho thuê</li>
+            </ol>
+        </nav>
+        <h3 class="fw-bold mb-1">Đăng ký chia sẻ / Cho thuê phương tiện</h3>
+        <p class="text-secondary small mb-0">Chia sẻ phương tiện nhàn rỗi với hàng xóm trong khu dân cư để kiếm thêm thu nhập hoặc tương trợ cộng đồng.</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4">
+                <div id="shareAlert" class="alert d-none py-2 small"></div>
+
+                <form id="shareForm" enctype="multipart/form-data" onsubmit="event.preventDefault(); submitShare();">
+                    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-info-circle me-2"></i>Thông tin phương tiện</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Tên xe <span class="text-danger">*</span></label>
+                        <input type="text" id="shareName" name="Name" class="form-control" placeholder="Ví dụ: Honda Vision 2023, Toyota Vios..." required />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Loại phương tiện <span class="text-danger">*</span></label>
+                            <select name="CategoryId" class="form-select" required>
+                                <option value="">-- Chọn loại xe --</option>
+                                @foreach (var c in categories)
+                                {
+                                    <option value="@c.Id">@c.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Khu dân cư bàn giao xe <span class="text-danger">*</span></label>
+                            <select name="CommunityId" class="form-select" required>
+                                <option value="">-- Chọn khu dân cư --</option>
+                                @foreach (var com in communities)
+                                {
+                                    <option value="@com.Id">@com.Name (@com.Address)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Hình thức chia sẻ</label>
+                            <select id="shareTypeSelect" name="ShareType" class="form-select" onchange="togglePriceInput(this.value)">
+                                <option value="Rental">Cho thuê có phí</option>
+                                <option value="Free">Miễn phí sử dụng</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Giá thuê / ngày (VNĐ)</label>
+                            <input type="number" id="sharePriceInput" name="Price" class="form-control" placeholder="Ví dụ: 120000" min="0" value="100000" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Tình trạng thực tế của xe</label>
+                        <input type="text" name="Condition" class="form-control" placeholder="Ví dụ: Xe mới 95%, đầy bình xăng, bảo dưỡng định kỳ..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Mô tả chi tiết & Quy định mượn xe</label>
+                        <textarea name="Description" class="form-control" rows="3" placeholder="Mô tả kỹ hơn về phụ kiện kèm theo (mũ bảo hiểm, sạc) hoặc yêu cầu giấy tờ..."></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold">Ảnh chụp phương tiện</label>
+                        <input type="file" id="shareImageFile" name="imageFile" class="form-control" accept="image/*" />
+                        <div class="form-text small text-muted">Tải ảnh rõ nét sẽ giúp xe của bạn được nhiều cư dân đặt thuê hơn.</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" id="btnSubmitShare" class="btn btn-primary fw-semibold flex-fill py-2">
+                            <i class="bi bi-send-check me-1"></i>Đăng xe lên hệ thống
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePriceInput(type) {
+            if (type === 'Free') {
+                $('#sharePriceInput').val(0).prop('readonly', true).css('background', '#e9ecef');
+            } else {
+                $('#sharePriceInput').prop('readonly', false).css('background', '#fff');
+                if ($('#sharePriceInput').val() == 0) $('#sharePriceInput').val(100000);
+            }
+        }
+
+        function submitShare() {
+            var form = document.getElementById('shareForm');
+            var formData = new FormData(form);
+
+            $('#btnSubmitShare').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Đang đăng bài...');
+
+            $.ajax({
+                url: '/Vehicle/RegisterShare',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    $('#btnSubmitShare').prop('disabled', false).html('<i class="bi bi-send-check me-1"></i>Đăng xe lên hệ thống');
+
+                    if (res.success) {
+                        $('#shareAlert').removeClass('d-none alert-danger').addClass('alert-success').text(res.message);
+                        $('#shareForm input, #shareForm select, #shareForm textarea, #btnSubmitShare').prop('disabled', true);
+                        setTimeout(function () {
+                            window.location.href = res.redirectUrl;
+                        }, 1200);
+                    } else {
+                        $('#shareAlert').removeClass('d-none alert-success').addClass('alert-danger').text(res.message);
+                    }
+                },
+                error: function () {
+                    $('#btnSubmitShare').prop('disabled', false).html('<i class="bi bi-send-check me-1"></i>Đăng xe lên hệ thống');
+                    $('#shareAlert').removeClass('d-none alert-success').addClass('alert-danger').text('Lỗi kết nối tới máy chủ, vui lòng thử lại sau!');
+                }
+            });
+        }
+    </script>
+}

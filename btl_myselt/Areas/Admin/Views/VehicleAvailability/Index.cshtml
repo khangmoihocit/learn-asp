@@ -1,0 +1,151 @@
+@model IEnumerable<btl_myselt.Models.Entities.VehicleAvailability>
+@using btl_myselt.Models.Entities
+
+@{
+    ViewData["Title"] = "Lịch rảnh xe";
+    Layout = "_AdminLayout";
+    var vehicles = ViewBag.Vehicles as List<Vehicle> ?? new List<Vehicle>();
+    var selectedVehicleId = ViewBag.SelectedVehicleId as int? ?? 0;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-clock-history text-success me-2"></i>Quản lý lịch rảnh phương tiện</h4>
+        <p class="text-secondary small mb-0">Quản lý các khung giờ xe sẵn sàng để cư dân đặt thuê</p>
+    </div>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createModal">
+        <i class="bi bi-plus-lg me-1"></i>Thêm lịch rảnh
+    </button>
+</div>
+
+<div class="card border-0 shadow-sm p-3 mb-4 bg-white">
+    <form method="get" asp-action="Index" class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <select name="vehicleId" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="0">-- Tất cả phương tiện --</option>
+                @foreach (var v in vehicles)
+                {
+                    <option value="@v.Id" selected="@(selectedVehicleId == v.Id)">@v.Name</option>
+                }
+            </select>
+        </div>
+        @if (selectedVehicleId > 0)
+        {
+            <div class="col-md-2">
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Bỏ lọc</a>
+            </div>
+        }
+    </form>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Phương tiện</th>
+                    <th>Bắt đầu rảnh</th>
+                    <th>Kết thúc rảnh</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>#@item.Id</td>
+                            <td>
+                                <strong class="text-dark">@(item.Vehicle?.Name ?? "—")</strong>
+                            </td>
+                            <td><i class="bi bi-calendar-event me-1 text-primary"></i>@item.StartAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><i class="bi bi-calendar-check me-1 text-success"></i>@item.EndAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-end">
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteAvailability(@item.Id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">Chưa có lịch rảnh nào được thiết lập.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="createModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">Thêm khung giờ rảnh xe</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createForm" onsubmit="event.preventDefault(); submitCreate();">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Chọn phương tiện</label>
+                        <select id="availVehicleId" class="form-select" required>
+                            <option value="">-- Chọn xe --</option>
+                            @foreach (var v in vehicles)
+                            {
+                                <option value="@v.Id">@v.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Bắt đầu rảnh</label>
+                        <input type="datetime-local" id="availStartAt" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Kết thúc rảnh</label>
+                        <input type="datetime-local" id="availEndAt" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary fw-semibold">Lưu lịch rảnh</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function submitCreate() {
+            var data = {
+                vehicleId: $('#availVehicleId').val(),
+                startAt: $('#availStartAt').val(),
+                endAt: $('#availEndAt').val()
+            };
+
+            $.post('/Admin/VehicleAvailability/Create', data, function (res) {
+                if (res.success) {
+                    location.reload();
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+
+        function deleteAvailability(id) {
+            if (!confirm('Bạn có chắc muốn xóa khung giờ rảnh này?')) return;
+
+            $.post('/Admin/VehicleAvailability/Delete', { id: id }, function (res) {
+                if (res.success) {
+                    location.reload();
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+    </script>
+}

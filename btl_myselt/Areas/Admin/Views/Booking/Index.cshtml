@@ -1,0 +1,137 @@
+@model IEnumerable<btl_myselt.Models.Entities.Booking>
+@using btl_myselt.Models.Enums
+
+@{
+    ViewData["Title"] = "Quản lý đơn thuê xe";
+    Layout = "_AdminLayout";
+    var selectedStatus = ViewBag.SelectedStatus as BookingStatus?;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-calendar2-check text-primary me-2"></i>Quản lý đơn đặt thuê xe</h4>
+        <p class="text-secondary small mb-0">Theo dõi, duyệt và cập nhật tiến độ các đơn thuê xe trong hệ thống</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-sm @(!selectedStatus.HasValue ? "btn-primary" : "btn-outline-secondary")">Tất cả</a>
+        <a asp-action="Index" asp-route-status="Pending" class="btn btn-sm @(selectedStatus == BookingStatus.Pending ? "btn-warning" : "btn-outline-warning text-dark")">Chờ duyệt</a>
+        <a asp-action="Index" asp-route-status="Confirmed" class="btn btn-sm @(selectedStatus == BookingStatus.Confirmed ? "btn-info" : "btn-outline-info text-dark")">Đã xác nhận</a>
+        <a asp-action="Index" asp-route-status="Completed" class="btn btn-sm @(selectedStatus == BookingStatus.Completed ? "btn-success" : "btn-outline-success")">Hoàn thành</a>
+        <a asp-action="Index" asp-route-status="Cancelled" class="btn btn-sm @(selectedStatus == BookingStatus.Cancelled ? "btn-danger" : "btn-outline-danger")">Đã hủy</a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Phương tiện</th>
+                    <th>Người thuê</th>
+                    <th>Thời gian thuê</th>
+                    <th>Tổng phí</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong class="text-primary">#@item.Id</strong></td>
+                            <td>
+                                <strong class="d-block text-dark">@(item.Vehicle?.Name ?? "—")</strong>
+                                <small class="text-muted">Biển số/ID: @item.VehicleId</small>
+                            </td>
+                            <td>
+                                <div>@(item.Borrower?.FullName ?? "—")</div>
+                                <small class="text-muted">@(item.Borrower?.PhoneNumber ?? "—")</small>
+                            </td>
+                            <td>
+                                <div class="small">Từ: <strong>@item.StartAt.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                                <div class="small">Đến: <strong>@item.EndAt.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                            </td>
+                            <td>
+                                <strong class="text-danger">@item.EstimatedFee.ToString("N0") đ</strong>
+                            </td>
+                            <td>
+                                @switch (item.Status)
+                                {
+                                    case BookingStatus.Pending:
+                                        <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                        break;
+                                    case BookingStatus.Confirmed:
+                                        <span class="badge bg-info text-dark">Đã duyệt</span>
+                                        break;
+                                    case BookingStatus.Ongoing:
+                                        <span class="badge bg-primary">Đang thuê</span>
+                                        break;
+                                    case BookingStatus.Completed:
+                                        <span class="badge bg-success">Hoàn thành</span>
+                                        break;
+                                    case BookingStatus.Cancelled:
+                                        <span class="badge bg-danger">Đã hủy</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    @if (item.Status == BookingStatus.Pending)
+                                    {
+                                        <button class="btn btn-outline-success" onclick="updateStatus(@item.Id, 'Confirmed')" title="Duyệt đơn">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="updateStatus(@item.Id, 'Cancelled')" title="Hủy đơn">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    }
+                                    else if (item.Status == BookingStatus.Confirmed)
+                                    {
+                                        <button class="btn btn-outline-primary" onclick="updateStatus(@item.Id, 'Ongoing')" title="Bắt đầu giao xe">
+                                            <i class="bi bi-play-fill"></i> Giao xe
+                                        </button>
+                                    }
+                                    else if (item.Status == BookingStatus.Ongoing)
+                                    {
+                                        <button class="btn btn-outline-success" onclick="updateStatus(@item.Id, 'Completed')" title="Xác nhận trả xe">
+                                            <i class="bi bi-check-circle"></i> Trả xe
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Đã đóng</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">Chưa có đơn thuê nào trong danh sách.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateStatus(id, status) {
+            if (!confirm('Bạn có chắc chắn muốn chuyển trạng thái đơn sang ' + status + '?')) return;
+
+            $.post('/Admin/Booking/UpdateStatus', { id: id, status: status }, function (res) {
+                if (res.success) {
+                    location.reload();
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+    </script>
+}

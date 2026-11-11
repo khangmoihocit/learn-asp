@@ -69,6 +69,10 @@
                         }
                     </td>
                     <td class="text-center">
+                        @if (item.Status == VehicleStatus.Hidden)
+                        {
+                            <button type="button" class="btn btn-sm btn-success me-1" onclick="approveVehicle(@item.Id)" title="Duyệt xe hiển thị"><i class="bi bi-check-lg"></i></button>
+                        }
                         <button type="button" class="btn btn-sm btn-info text-white me-1" onclick="openDetail(@item.Id)" title="Chi tiết"><i class="bi bi-eye"></i></button>
                         <button type="button" class="btn btn-sm btn-secondary text-white me-1" onclick="openImages(@item.Id)" title="Quản lý ảnh"><i class="bi bi-images"></i></button>
                         <button type="button" class="btn btn-sm btn-warning me-1" onclick="openEdit(@item.Id)" title="Sửa"><i class="bi bi-pencil"></i></button>
@@ -284,6 +288,17 @@
             if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
             $.post('/Admin/Vehicle/DeleteImage', { imageId: imageId }, function (res) {
                 if (res.success) loadImages(currentVehicleId);
+            });
+        }
+
+        function approveVehicle(id) {
+            if (!confirm('Bạn có chắc chắn muốn phê duyệt phương tiện này để hiển thị công khai?')) return;
+            $.post('/Admin/Vehicle/Approve', { id: id }, function (res) {
+                if (res.success) {
+                    location.reload();
+                } else {
+                    alert(res.message);
+                }
             });
         }
     </script>
