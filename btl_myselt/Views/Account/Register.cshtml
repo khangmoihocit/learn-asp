@@ -1,42 +1,44 @@
 @using btl_myselt.Models.Entities
 @{
-    ViewData["Title"] = "Đăng ký thành viên";
+    ViewData["Title"] = "Đăng ký thành viên - NeighborRide";
+    ViewData["Description"] = "Tạo tài khoản cư dân trên NeighborRide để bắt đầu thuê xe, chia sẻ phương tiện nhàn rỗi và kết nối an toàn với hàng xóm láng giềng.";
+    ViewData["Keywords"] = "đăng ký tài khoản, cư dân nội khu, thuê xe, chia sẻ phương tiện, NeighborRide";
     var communities = ViewBag.Communities as List<Community> ?? new List<Community>();
 }
 
-<div class="container py-5">
+<main class="container py-4 py-md-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 p-4">
-                <h3 class="fw-bold text-center text-primary mb-1">Tạo Tài Khoản Cư Dân</h3>
+        <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+            <div class="card shadow-sm border-0 p-3 p-sm-4">
+                <h1 class="fw-bold text-center text-primary fs-3 mb-1">Tạo Tài Khoản Cư Dân</h1>
                 <p class="text-center text-muted small mb-3">Tham gia cộng đồng chia sẻ phương tiện văn minh</p>
 
                 <!-- Hộp thông báo lỗi/thành công -->
-                <div id="registerAlert" class="alert d-none py-2 small"></div>
+                <div id="registerAlert" class="alert d-none py-2 small" role="alert"></div>
 
                 <form id="registerForm">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Họ và tên</label>
-                        <input type="text" id="regFullName" class="form-control" placeholder="Nguyễn Văn A" />
+                        <label for="regFullName" class="form-label small fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+                        <input type="text" id="regFullName" class="form-control py-2" placeholder="Nguyễn Văn A" autocomplete="name" aria-label="Họ và tên" />
                         <span id="errFullName" class="text-danger small"></span>
                     </div>
 
                     <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Email</label>
-                            <input type="text" id="regEmail" class="form-control" placeholder="name@domain.com" />
+                        <div class="col-12 col-md-6">
+                            <label for="regEmail" class="form-label small fw-semibold">Email <span class="text-danger">*</span></label>
+                            <input type="email" id="regEmail" class="form-control py-2" placeholder="name@domain.com" autocomplete="email" aria-label="Địa chỉ email" />
                             <span id="errEmail" class="text-danger small"></span>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Số điện thoại</label>
-                            <input type="text" id="regPhone" class="form-control" placeholder="09xxxxxxxx" />
+                        <div class="col-12 col-md-6">
+                            <label for="regPhone" class="form-label small fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                            <input type="tel" id="regPhone" class="form-control py-2" placeholder="09xxxxxxxx" autocomplete="tel" aria-label="Số điện thoại" />
                             <span id="errPhone" class="text-danger small"></span>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Khu dân cư sinh sống</label>
-                        <select id="regCommunityId" class="form-select">
+                        <label for="regCommunityId" class="form-label small fw-semibold">Khu dân cư sinh sống <span class="text-danger">*</span></label>
+                        <select id="regCommunityId" class="form-select py-2" aria-label="Chọn khu dân cư sinh sống">
                             <option value="0">-- Chọn khu dân cư --</option>
                             @foreach (var c in communities)
                             {
@@ -47,19 +49,19 @@
                     </div>
 
                     <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Mật khẩu</label>
-                            <input type="password" id="regPassword" class="form-control" placeholder="Tối thiểu 6 ký tự" />
+                        <div class="col-12 col-md-6">
+                            <label for="regPassword" class="form-label small fw-semibold">Mật khẩu <span class="text-danger">*</span></label>
+                            <input type="password" id="regPassword" class="form-control py-2" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password" aria-label="Mật khẩu" />
                             <span id="errPassword" class="text-danger small"></span>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Nhập lại mật khẩu</label>
-                            <input type="password" id="regConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" />
+                        <div class="col-12 col-md-6">
+                            <label for="regConfirmPassword" class="form-label small fw-semibold">Nhập lại mật khẩu <span class="text-danger">*</span></label>
+                            <input type="password" id="regConfirmPassword" class="form-control py-2" placeholder="Nhập lại mật khẩu" autocomplete="new-password" aria-label="Nhập lại mật khẩu" />
                             <span id="errConfirmPassword" class="text-danger small"></span>
                         </div>
                     </div>
 
-                    <button type="submit" id="btnRegister" class="btn btn-primary w-100 fw-semibold py-2 mb-3">
+                    <button type="submit" id="btnRegister" class="btn btn-primary w-100 fw-semibold py-2 mb-3" aria-label="Đăng ký tài khoản">
                         Đăng Ký
                     </button>
 
@@ -70,7 +72,7 @@
             </div>
         </div>
     </div>
-</div>
+</main>
 
 @section Scripts {
     <script>

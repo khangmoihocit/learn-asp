@@ -1,0 +1,281 @@
+@using btl_myselt.Models.Entities
+@using btl_myselt.Models.Enums
+@{
+    ViewData["Title"] = "Thống kê & Tổng quan hệ thống";
+    Layout = "_AdminLayout";
+    var recentBookings = ViewBag.RecentBookings as List<Booking> ?? new List<Booking>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="bi bi-speedometer2 text-primary me-2"></i>Báo Cáo & Thống Kê Tổng Quan</h3>
+        <p class="text-secondary small mb-0">Theo dõi toàn diện các chỉ số hoạt động, phương tiện và doanh thu của hệ thống NeighborRide</p>
+    </div>
+    <div class="text-end">
+        <span class="badge bg-light text-dark border p-2"><i class="bi bi-clock me-1"></i>Cập nhật: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-secondary small fw-semibold text-uppercase">Tổng phương tiện</span>
+                    <h3 class="fw-bold text-dark mt-1 mb-0">@ViewBag.TotalVehicles</h3>
+                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>@ViewBag.AvailableVehicles sẵn sàng</small>
+                </div>
+                <div class="bg-primary-subtle text-primary rounded-3 p-3 fs-3">
+                    <i class="bi bi-car-front-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm p-3 h-100 ">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-secondary small fw-semibold text-uppercase">Tổng doanh thu</span>
+                    <h3 class="fw-bold text-success mt-1 mb-0">@(((decimal)ViewBag.TotalRevenue).ToString("N0")) đ</h3>
+                    <small class="text-muted">Từ các đơn thành công</small>
+                </div>
+                <div class="bg-success-subtle text-success rounded-3 p-3 fs-3">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm p-3 h-100 ">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-secondary small fw-semibold text-uppercase">Đơn đặt thuê</span>
+                    <h3 class="fw-bold text-info mt-1 mb-0">@ViewBag.TotalBookings</h3>
+                    <small class="text-warning"><i class="bi bi-hourglass-split me-1"></i>@ViewBag.PendingBookings chờ duyệt</small>
+                </div>
+                <div class="bg-info-subtle text-info rounded-3 p-3 fs-3">
+                    <i class="bi bi-calendar2-check-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm p-3 h-100 ">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-secondary small fw-semibold text-uppercase">Cộng đồng cư dân</span>
+                    <h3 class="fw-bold text-dark mt-1 mb-0">@ViewBag.TotalUsers</h3>
+                    <small class="text-muted">Tài khoản thành viên</small>
+                </div>
+                <div class="bg-warning-subtle text-warning rounded-3 p-3 fs-3">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hàng việc cần xử lý gấp -->
+@if ((int)ViewBag.PendingBookings > 0 || (int)ViewBag.PendingVehicles > 0 || (int)ViewBag.PendingReports > 0)
+{
+    <div class="alert alert-warning border-0 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-bell-fill fs-3 text-warning"></i>
+            <div>
+                <strong class="d-block text-dark">Các mục đang chờ Admin phê duyệt & xử lý:</strong>
+                <span class="small text-secondary">
+                    @if ((int)ViewBag.PendingBookings > 0) { <a asp-controller="Booking" asp-action="Index" asp-route-status="Pending" class="badge bg-warning text-dark text-decoration-none me-2">@ViewBag.PendingBookings đơn thuê mới</a> }
+                    @if ((int)ViewBag.PendingVehicles > 0) { <a asp-controller="Vehicle" asp-action="Index" class="badge bg-info text-dark text-decoration-none me-2">@ViewBag.PendingVehicles xe mới chờ duyệt</a> }
+                    @if ((int)ViewBag.PendingReports > 0) { <a asp-controller="ViolationReport" asp-action="Index" asp-route-status="Pending" class="badge bg-danger text-decoration-none me-2">@ViewBag.PendingReports báo cáo vi phạm</a> }
+                </span>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Biểu đồ cột Doanh thu theo tháng -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart-line text-primary me-2"></i>Doanh thu 6 tháng gần nhất (VNĐ)</h5>
+            <div style="height: 300px;">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ tròn Cơ cấu loại phương tiện -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart text-success me-2"></i>Cơ cấu loại phương tiện</h5>
+            <div style="height: 300px; position: relative;">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Đơn thuê gần đây & Thống kê khu dân cư -->
+<div class="row g-4 mb-4">
+    <!-- Bảng đơn thuê mới nhất -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-list-check text-info me-2"></i>Đơn đặt thuê xe gần đây</h5>
+                <a asp-controller="Booking" asp-action="Index" class="small text-decoration-none fw-semibold">Xem tất cả &rarr;</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Xe</th>
+                            <th>Người thuê</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Tổng phí</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (recentBookings.Any())
+                        {
+                            foreach (var b in recentBookings)
+                            {
+                                <tr>
+                                    <td><strong class="text-primary">#@b.Id</strong></td>
+                                    <td>@(b.Vehicle?.Name ?? "—")</td>
+                                    <td>@(b.Borrower?.FullName ?? "—")</td>
+                                    <td>@b.StartAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td><strong class="text-danger">@b.EstimatedFee.ToString("N0") đ</strong></td>
+                                    <td>
+                                        @switch (b.Status)
+                                        {
+                                            case BookingStatus.Pending:
+                                                <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                                break;
+                                            case BookingStatus.Confirmed:
+                                                <span class="badge bg-info text-dark">Đã duyệt</span>
+                                                break;
+                                            case BookingStatus.Ongoing:
+                                                <span class="badge bg-primary">Đang thuê</span>
+                                                break;
+                                            case BookingStatus.Completed:
+                                                <span class="badge bg-success">Hoàn thành</span>
+                                                break;
+                                            case BookingStatus.Cancelled:
+                                                <span class="badge bg-danger">Đã hủy</span>
+                                                break;
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="6" class="text-center py-3 text-muted">Chưa có đơn thuê nào.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ phân bổ theo khu dân cư -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-buildings text-warning me-2"></i>Xe theo Khu dân cư</h5>
+            <div style="height: 300px; position: relative;">
+                <canvas id="communityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Thư viện Chart.js phổ biến và nhẹ nhất -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 1. Biểu đồ Doanh thu (Bar Chart)
+        var revLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MonthlyLabels));
+        var revData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MonthlyRevenues));
+
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'bar',
+            data: {
+                labels: revLabels,
+                datasets: [{
+                    label: 'Doanh thu (VNĐ)',
+                    data: revData,
+                    backgroundColor: 'rgba(13, 110, 253, 0.75)',
+                    borderColor: 'rgb(13, 110, 253)',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(val) { return Number(val).toLocaleString() + ' đ'; }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Biểu đồ Loại xe (Doughnut Chart)
+        var catNames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.CategoryNames));
+        var catCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.CategoryCounts));
+
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: catNames,
+                datasets: [{
+                    data: catCounts,
+                    backgroundColor: [
+                        '#0d6efd', '#198754', '#ffc107', '#0dcaf0', '#6f42c1', '#fd7e14'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // 3. Biểu đồ Khu dân cư (Polar Area / Bar Chart)
+        var comNames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.CommunityNames));
+        var comCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.CommunityCounts));
+
+        new Chart(document.getElementById('communityChart'), {
+            type: 'pie',
+            data: {
+                labels: comNames,
+                datasets: [{
+                    data: comCounts,
+                    backgroundColor: [
+                        '#20c997', '#0d6efd', '#6610f2', '#fd7e14', '#d63384', '#ffc107'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    </script>
+}

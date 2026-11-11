@@ -1,12 +1,14 @@
 @using btl_myselt.Models.Entities
 @using btl_myselt.Models.Enums
 @{
-    ViewData["Title"] = "Đăng ký cho thuê phương tiện";
+    ViewData["Title"] = "Đăng ký cho thuê phương tiện - Chia sẻ xe nội khu";
+    ViewData["Description"] = "Đăng ký chia sẻ, cho thuê phương tiện nhàn rỗi (ô tô, xe máy, xe đạp) với cư dân láng giềng trong khu dân cư an toàn, tiện lợi.";
+    ViewData["Keywords"] = "đăng ký cho thuê xe, chia sẻ phương tiện, kiếm thêm thu nhập, xe nội khu";
     var categories = ViewBag.Categories as List<VehicleCategory> ?? new List<VehicleCategory>();
     var communities = ViewBag.Communities as List<Community> ?? new List<Community>();
 }
 
-<div class="bg-light py-3 border-bottom mb-4">
+<section class="bg-light py-3 border-bottom mb-4">
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-1 small">
@@ -15,29 +17,29 @@
                 <li class="breadcrumb-item active" aria-current="page">Đăng ký cho thuê</li>
             </ol>
         </nav>
-        <h3 class="fw-bold mb-1">Đăng ký chia sẻ / Cho thuê phương tiện</h3>
+        <h1 class="fw-bold fs-3 mb-1">Đăng ký chia sẻ / Cho thuê phương tiện</h1>
         <p class="text-secondary small mb-0">Chia sẻ phương tiện nhàn rỗi với hàng xóm trong khu dân cư để kiếm thêm thu nhập hoặc tương trợ cộng đồng.</p>
     </div>
-</div>
+</section>
 
-<div class="container mb-5">
+<main class="container mb-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm p-4">
+        <div class="col-12 col-md-10 col-lg-8">
+            <div class="card border-0 shadow-sm p-3 p-md-4">
                 <div id="shareAlert" class="alert d-none py-2 small"></div>
 
                 <form id="shareForm" enctype="multipart/form-data" onsubmit="event.preventDefault(); submitShare();">
-                    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-info-circle me-2"></i>Thông tin phương tiện</h5>
+                    <h2 class="fw-bold fs-5 text-primary mb-3"><i class="bi bi-info-circle me-2"></i>Thông tin phương tiện</h2>
 
                     <div class="mb-3">
                         <label class="form-label small fw-semibold">Tên xe <span class="text-danger">*</span></label>
-                        <input type="text" id="shareName" name="Name" class="form-control" placeholder="Ví dụ: Honda Vision 2023, Toyota Vios..." required />
+                        <input type="text" id="shareName" name="Name" class="form-control" placeholder="Ví dụ: Honda Vision 2023, Toyota Vios..." required aria-label="Tên phương tiện" />
                     </div>
 
                     <div class="row g-3 mb-3">
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
                             <label class="form-label small fw-semibold">Loại phương tiện <span class="text-danger">*</span></label>
-                            <select name="CategoryId" class="form-select" required>
+                            <select name="CategoryId" class="form-select" required aria-label="Chọn loại phương tiện">
                                 <option value="">-- Chọn loại xe --</option>
                                 @foreach (var c in categories)
                                 {
@@ -46,9 +48,9 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
                             <label class="form-label small fw-semibold">Khu dân cư bàn giao xe <span class="text-danger">*</span></label>
-                            <select name="CommunityId" class="form-select" required>
+                            <select name="CommunityId" class="form-select" required aria-label="Chọn khu dân cư bàn giao xe">
                                 <option value="">-- Chọn khu dân cư --</option>
                                 @foreach (var com in communities)
                                 {
@@ -59,47 +61,47 @@
                     </div>
 
                     <div class="row g-3 mb-3">
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
                             <label class="form-label small fw-semibold">Hình thức chia sẻ</label>
-                            <select id="shareTypeSelect" name="ShareType" class="form-select" onchange="togglePriceInput(this.value)">
+                            <select id="shareTypeSelect" name="ShareType" class="form-select" aria-label="Chọn hình thức chia sẻ" onchange="togglePriceInput(this.value)">
                                 <option value="Rental">Cho thuê có phí</option>
                                 <option value="Free">Miễn phí sử dụng</option>
                             </select>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
                             <label class="form-label small fw-semibold">Giá thuê / ngày (VNĐ)</label>
-                            <input type="number" id="sharePriceInput" name="Price" class="form-control" placeholder="Ví dụ: 120000" min="0" value="100000" required />
+                            <input type="number" id="sharePriceInput" name="Price" class="form-control" placeholder="Ví dụ: 120000" min="0" value="100000" required aria-label="Giá thuê theo ngày" />
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label small fw-semibold">Tình trạng thực tế của xe</label>
-                        <input type="text" name="Condition" class="form-control" placeholder="Ví dụ: Xe mới 95%, đầy bình xăng, bảo dưỡng định kỳ..." />
+                        <input type="text" name="Condition" class="form-control" placeholder="Ví dụ: Xe mới 95%, đầy bình xăng, bảo dưỡng định kỳ..." aria-label="Tình trạng xe" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label small fw-semibold">Mô tả chi tiết & Quy định mượn xe</label>
-                        <textarea name="Description" class="form-control" rows="3" placeholder="Mô tả kỹ hơn về phụ kiện kèm theo (mũ bảo hiểm, sạc) hoặc yêu cầu giấy tờ..."></textarea>
+                        <textarea name="Description" class="form-control" rows="3" placeholder="Mô tả kỹ hơn về phụ kiện kèm theo (mũ bảo hiểm, sạc) hoặc yêu cầu giấy tờ..." aria-label="Mô tả chi tiết xe"></textarea>
                     </div>
 
                     <div class="mb-4">
                         <label class="form-label small fw-semibold">Ảnh chụp phương tiện</label>
-                        <input type="file" id="shareImageFile" name="imageFile" class="form-control" accept="image/*" />
+                        <input type="file" id="shareImageFile" name="imageFile" class="form-control" accept="image/*" aria-label="Tải ảnh phương tiện" />
                         <div class="form-text small text-muted">Tải ảnh rõ nét sẽ giúp xe của bạn được nhiều cư dân đặt thuê hơn.</div>
                     </div>
 
-                    <div class="d-flex gap-2">
+                    <div class="d-flex flex-column flex-sm-row gap-2">
                         <button type="submit" id="btnSubmitShare" class="btn btn-primary fw-semibold flex-fill py-2">
                             <i class="bi bi-send-check me-1"></i>Đăng xe lên hệ thống
                         </button>
-                        <a asp-action="Index" class="btn btn-outline-secondary px-4">Hủy</a>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2 text-center">Hủy</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
+</main>
 
 @section Scripts {
     <script>

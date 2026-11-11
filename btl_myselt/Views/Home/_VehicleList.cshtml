@@ -13,55 +13,54 @@
 
         @if (Model != null && Model.Any())
         {
-            <div class="row g-4">
+            <div class="row g-3 g-md-4">
                 @foreach (var item in Model)
                 {
                     var primaryImg = item.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? "/images/default-vehicle.png";
-                    <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                         <div class="card h-100 shadow-sm border-0">
                             <div class="position-relative">
-                                <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Id" class="d-block"><img
-                                    src="@primaryImg" class="card-img-top" style="height: 180px; object-fit: cover;"
-                                    onerror="this.src='https://placehold.co/300x180?text=Xe'" /></a>
-                                    <span class="badge bg-dark position-absolute top-0 start-0 m-2">@(item.Category?.Name ??
-                                                                                                        "Xe")</span>
-                                        @if (item.ShareType == ShareType.Free)
-                                        {
-                                            <span class="badge bg-success position-absolute top-0 end-0 m-2">Miễn phí</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Cho thuê</span>
-                                        }
-                                    </div>
-                                    <div class="card-body d-flex flex-column">
-                                        <h5 class="card-title mb-1 text-truncate">
-                                            <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Id"
-                                               class="text-decoration-none text-dark fw-bold" title="@item.Name">
-                                                @item.Name
-                                            </a>
-                                        </h5>
-                                        <div class="text-primary fw-bold fs-5 mb-2">
-                                            @(item.ShareType == ShareType.Free ? "0 đ / ngày" : item.Price.ToString("N0") + " đ / ngày")
-                                        </div>
-                                        <p class="card-text text-muted small mb-1 text-truncate">
-                                            <i class="bi bi-geo-alt text-danger me-1"></i>@(item.Community?.Name ?? "Khu dân cư")
-                                        </p>
-                                        <p class="card-text text-muted small mb-3 text-truncate">
-                                            <i class="bi bi-person me-1"></i>@(item.Owner?.FullName ?? "Chủ xe")
-                                        </p>
-                                        <div class="mt-auto">
-                                            <button type="button" class="btn btn-outline-primary btn-sm w-100 fw-semibold"
-                                                    onclick="openDetail(@item.Id)">
-                                                <i class="bi bi-eye me-1"></i>Xem nhanh
-                                            </button>
-                                        </div>
-                                    </div>
+                                <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Id" class="d-block" title="Xem chi tiết xe @item.Name">
+                                    <img src="@primaryImg" alt="Phương tiện @item.Name tại @(item.Community?.Name ?? "khu dân cư")" loading="lazy" class="card-img-top" style="height: 180px; object-fit: cover;" onerror="this.src='https://placehold.co/300x180?text=Xe'" />
+                                </a>
+                                <span class="badge bg-dark position-absolute top-0 start-0 m-2">@(item.Category?.Name ?? "Xe")</span>
+                                @if (item.ShareType == ShareType.Free)
+                                {
+                                    <span class="badge bg-success position-absolute top-0 end-0 m-2">Miễn phí</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Cho thuê</span>
+                                }
+                            </div>
+                            <div class="card-body d-flex flex-column p-3">
+                                <h5 class="card-title mb-1 text-truncate fs-6">
+                                    <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Id"
+                                       class="text-decoration-none text-dark fw-bold" title="@item.Name">
+                                        @item.Name
+                                    </a>
+                                </h5>
+                                <div class="text-primary fw-bold fs-5 mb-2">
+                                    @(item.ShareType == ShareType.Free ? "0 đ / ngày" : item.Price.ToString("N0") + " đ / ngày")
+                                </div>
+                                <p class="card-text text-muted small mb-1 text-truncate">
+                                    <i class="bi bi-geo-alt text-danger me-1"></i>@(item.Community?.Name ?? "Khu dân cư")
+                                </p>
+                                <p class="card-text text-muted small mb-3 text-truncate">
+                                    <i class="bi bi-person me-1"></i>@(item.Owner?.FullName ?? "Chủ xe")
+                                </p>
+                                <div class="mt-auto">
+                                    <button type="button" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2"
+                                            onclick="openDetail(@item.Id)" aria-label="Xem nhanh xe @item.Name">
+                                        <i class="bi bi-eye me-1"></i>Xem nhanh
+                                    </button>
                                 </div>
                             </div>
-                        }
+                        </div>
                     </div>
                 }
+            </div>
+        }
         else
                 {
                     <div class="text-center py-5 text-muted">

@@ -3,7 +3,9 @@
 @using btl_myselt.Models.Enums
 
 @{
-    ViewData["Title"] = "Tìm phương tiện";
+    ViewData["Title"] = "Tìm kiếm phương tiện - Thuê xe cư dân nội khu";
+    ViewData["Description"] = "Tìm kiếm xe máy, ô tô, xe đạp điện cho thuê hoặc chia sẻ miễn phí trong cộng đồng cư dân. Đặt xe nhanh, an toàn và tiết kiệm.";
+    ViewData["Keywords"] = "thuê xe nội khu, tìm xe máy, thuê ô tô cư dân, xe đạp điện, chia sẻ phương tiện";
     var categories = ViewBag.Categories as List<VehicleCategory> ?? new List<VehicleCategory>();
     var communities = ViewBag.Communities as List<Community> ?? new List<Community>();
     var currentKeyword = ViewBag.Keyword as string ?? "";
@@ -13,7 +15,7 @@
     var selectedSort = ViewBag.SelectedSort as string ?? "";
 }
 
-<div class="bg-light py-3 border-bottom mb-4">
+<section class="bg-light py-3 border-bottom mb-4">
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-1 small">
@@ -21,25 +23,25 @@
                 <li class="breadcrumb-item active" aria-current="page">Tìm phương tiện</li>
             </ol>
         </nav>
-        <h3 class="fw-bold mb-1">Tìm kiếm phương tiện nội khu</h3>
+        <h1 class="fw-bold fs-3 mb-1">Tìm kiếm phương tiện nội khu</h1>
         <p class="text-secondary small mb-0">Duyệt và thuê các phương tiện sẵn có từ cộng đồng cư dân với chi phí tối ưu.</p>
     </div>
-</div>
+</section>
 
-<div class="container mb-5">
+<main class="container mb-5">
     <form id="filterForm" onsubmit="event.preventDefault(); loadVehicles();" class="card shadow-sm p-3 border-0 bg-light mb-4">
-        <div class="row g-2 align-items-center">
-            <div class="col-md-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-6 col-lg-3">
                 <label class="form-label small fw-semibold text-secondary mb-1">Từ khóa</label>
                 <div class="input-group">
                     <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                    <input type="text" name="keyword" id="filterKeyword" class="form-control" value="@currentKeyword" placeholder="Tên xe, địa chỉ..." oninput="loadVehiclesDebounced()" />
+                    <input type="text" name="keyword" id="filterKeyword" class="form-control" value="@currentKeyword" placeholder="Tên xe, địa chỉ..." aria-label="Tìm theo tên xe hoặc địa chỉ" oninput="loadVehiclesDebounced()" />
                 </div>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-6 col-md-3 col-lg-2">
                 <label class="form-label small fw-semibold text-secondary mb-1">Loại xe</label>
-                <select name="categoryId" id="filterCategory" class="form-select" onchange="syncCategoryPill(); loadVehicles();">
+                <select name="categoryId" id="filterCategory" class="form-select" aria-label="Chọn loại xe" onchange="syncCategoryPill(); loadVehicles();">
                     <option value="0">Tất cả loại xe</option>
                     @foreach (var c in categories)
                     {
@@ -48,9 +50,18 @@
                 </select>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-6 col-md-3 col-lg-2">
+                <label class="form-label small fw-semibold text-secondary mb-1">Hình thức</label>
+                <select name="shareType" id="filterShareType" class="form-select" aria-label="Chọn hình thức chia sẻ" onchange="loadVehicles()">
+                    <option value="">Tất cả</option>
+                    <option value="Rental" selected="@(selectedShareType == ShareType.Rental)">Cho thuê</option>
+                    <option value="Free" selected="@(selectedShareType == ShareType.Free)">Miễn phí</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-8 col-lg-3">
                 <label class="form-label small fw-semibold text-secondary mb-1">Khu dân cư</label>
-                <select name="communityId" id="filterCommunity" class="form-select" onchange="loadVehicles()">
+                <select name="communityId" id="filterCommunity" class="form-select" aria-label="Chọn khu dân cư" onchange="loadVehicles()">
                     <option value="0">Tất cả khu vực</option>
                     @foreach (var com in communities)
                     {
@@ -59,26 +70,17 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
-                <label class="form-label small fw-semibold text-secondary mb-1">Hình thức</label>
-                <select name="shareType" id="filterShareType" class="form-select" onchange="loadVehicles()">
-                    <option value="">Tất cả</option>
-                    <option value="Rental" selected="@(selectedShareType == ShareType.Rental)">Cho thuê</option>
-                    <option value="Free" selected="@(selectedShareType == ShareType.Free)">Miễn phí</option>
-                </select>
-            </div>
-
-            <div class="col-md-2 d-flex gap-1 align-items-end" style="margin-top: 24px;">
-                <button type="button" class="btn btn-primary w-100 fw-semibold" onclick="loadVehicles()">
+            <div class="col-12 col-md-4 col-lg-2 d-flex gap-1">
+                <button type="button" class="btn btn-primary w-100 fw-semibold py-2" onclick="loadVehicles()" aria-label="Tìm kiếm theo bộ lọc">
                     <i class="bi bi-funnel me-1"></i>Lọc
                 </button>
-                <button type="button" class="btn btn-outline-secondary" onclick="resetFilters()" title="Đặt lại bộ lọc">
+                <button type="button" class="btn btn-outline-secondary py-2" onclick="resetFilters()" title="Đặt lại bộ lọc" aria-label="Đặt lại bộ lọc">
                     <i class="bi bi-arrow-counterclockwise"></i>
                 </button>
             </div>
         </div>
 
-        <div class="d-flex align-items-center gap-1 mt-3 overflow-auto pb-1">
+        <div class="d-flex align-items-center gap-1 mt-3 overflow-x-auto pb-1 text-nowrap" style="scrollbar-width: thin;">
             <span class="small text-secondary fw-semibold me-2 text-nowrap">Chọn nhanh:</span>
             <button type="button" class="btn btn-sm cat-pill @(selectedCategory == 0 ? "btn-primary" : "btn-outline-secondary") rounded-pill px-3 text-nowrap" data-cat-id="0" onclick="filterByQuickCat(this, 0)">Tất cả</button>
             @foreach (var c in categories)
@@ -88,15 +90,15 @@
         </div>
     </form>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
         <div>
             <span class="text-secondary">Tìm thấy</span>
             <strong class="text-dark fs-5 mx-1" id="vehicleCount">@((Model != null ? Model.Count() : 0))</strong>
             <span class="text-secondary">phương tiện</span>
         </div>
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center w-100 w-sm-auto justify-content-end">
             <label class="small text-secondary me-2 fw-semibold text-nowrap">Sắp xếp:</label>
-            <select id="filterSort" class="form-select form-select-sm" style="width: 170px;" onchange="loadVehicles()">
+            <select id="filterSort" class="form-select form-select-sm" style="max-width: 180px;" aria-label="Sắp xếp danh sách phương tiện" onchange="loadVehicles()">
                 <option value="" selected="@(string.IsNullOrEmpty(selectedSort))">Mới nhất</option>
                 <option value="price_asc" selected="@(selectedSort == "price_asc")">Giá: Thấp đến cao</option>
                 <option value="price_desc" selected="@(selectedSort == "price_desc")">Giá: Cao đến thấp</option>
@@ -108,23 +110,23 @@
     <div id="vehicleGridContainer">
         <partial name="_VehicleGrid" model="Model" />
     </div>
-</div>
+</main>
 
-<div class="modal fade" id="detailModal" tabindex="-1">
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold"><i class="bi bi-info-circle me-2"></i>Xem nhanh phương tiện</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title fw-bold" id="detailModalLabel"><i class="bi bi-info-circle me-2"></i>Xem nhanh phương tiện</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
-            <div class="modal-body p-4 row g-3">
-                <div class="col-md-5">
-                    <img id="detailImg" src="" class="img-fluid rounded border mb-2" style="width: 100%; height: 220px; object-fit: cover;" onerror="this.src='https://placehold.co/300x220?text=No+Image'" />
-                    <div id="detailThumbnails" class="d-flex gap-2 overflow-auto"></div>
+            <div class="modal-body p-3 p-md-4 row g-3">
+                <div class="col-12 col-md-5">
+                    <img id="detailImg" src="" alt="Hình ảnh phương tiện" class="img-fluid rounded border mb-2 w-100" style="height: 220px; object-fit: cover;" onerror="this.src='https://placehold.co/300x220?text=No+Image'" />
+                    <div id="detailThumbnails" class="d-flex gap-2 overflow-x-auto pb-1"></div>
                 </div>
-                <div class="col-md-7">
-                    <h4 id="detailName" class="text-primary fw-bold mb-2"></h4>
-                    <h5 id="detailPrice" class="text-danger fw-bold mb-3"></h5>
+                <div class="col-12 col-md-7">
+                    <h4 id="detailName" class="text-primary fw-bold mb-2 fs-5 fs-md-4"></h4>
+                    <div id="detailPrice" class="text-danger fw-bold fs-5 mb-3"></div>
                     <ul class="list-group list-group-flush small mb-3">
                         <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Loại xe:</span><strong id="detailCategory"></strong></li>
                         <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Khu dân cư:</span><strong id="detailCommunity"></strong></li>
@@ -136,9 +138,9 @@
                     <div class="bg-light p-2 rounded small" id="detailDescription"></div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <a id="detailPageBtn" href="#" class="btn btn-primary fw-semibold">
+            <div class="modal-footer flex-column flex-sm-row">
+                <button type="button" class="btn btn-secondary w-100 w-sm-auto mb-2 mb-sm-0" data-bs-dismiss="modal">Đóng</button>
+                <a id="detailPageBtn" href="#" class="btn btn-primary fw-semibold w-100 w-sm-auto">
                     <i class="bi bi-box-arrow-up-right me-1"></i>Trang chi tiết & Đặt xe
                 </a>
             </div>

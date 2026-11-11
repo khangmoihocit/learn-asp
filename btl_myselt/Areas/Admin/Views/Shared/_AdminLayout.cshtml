@@ -10,7 +10,7 @@
 </head>
 <body class="bg-light">
     <nav class="navbar navbar-dark bg-dark px-3 shadow-sm sticky-top">
-        <a class="navbar-brand fw-bold" asp-area="Admin" asp-controller="Vehicle" asp-action="Index">
+        <a class="navbar-brand fw-bold" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
             <i class="bi bi-speedometer2 me-2"></i>ADMIN DASHBOARD
         </a>
         <div class="d-flex align-items-center">
@@ -28,8 +28,13 @@
                     <h6 class="sidebar-heading px-3 text-muted text-uppercase small fw-bold mb-3">Quản lý hệ thống</h6>
                     <ul class="nav flex-column gap-1">
                         <li class="nav-item">
+                            <a class="nav-link rounded px-3 text-dark fw-semibold" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Thống kê tổng quan
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link rounded px-3 text-dark fw-semibold" asp-area="Admin" asp-controller="Vehicle" asp-action="Index">
-                                <i class="bi bi-car-front me-2 text-primary"></i>Quản lý phương tiện
+                                <i class="bi bi-car-front me-2 text-info"></i>Quản lý phương tiện
                             </a>
                         </li>
                         <li class="nav-item">

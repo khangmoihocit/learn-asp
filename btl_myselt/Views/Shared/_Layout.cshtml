@@ -4,7 +4,18 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Chia sẻ phương tiện nội khu</title>
+    <title>@ViewData["Title"] - NeighborRide Nền tảng thuê xe nội khu</title>
+    <meta name="description"
+          content="@(ViewData["Description"] ?? "NeighborRide - Nền tảng chia sẻ và cho thuê phương tiện ô tô, xe máy văn minh, tiện lợi, giá rẻ nội khu dân cư.")" />
+    <meta name="keywords"
+          content="@(ViewData["Keywords"] ?? "thuê xe nội khu, chia sẻ xe, thuê xe tự lái, thuê xe máy, thuê ô tô, NeighborRide")" />
+    <meta name="robots" content="index, follow" />
+    <!-- Open Graph for Social Share -->
+    <meta property="og:title" content="@ViewData["Title"] - NeighborRide" />
+    <meta property="og:description"
+          content="@(ViewData["Description"] ?? "Nền tảng chia sẻ và cho thuê phương tiện nội khu dân cư.")" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/images/hero-bg.jpg" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -29,7 +40,8 @@
                             <a class="nav-link" asp-controller="Vehicle" asp-action="Index">Tìm phương tiện</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-success fw-semibold" asp-controller="Vehicle" asp-action="RegisterShare">
+                            <a class="nav-link text-success fw-semibold" asp-controller="Vehicle"
+                               asp-action="RegisterShare">
                                 <i class="bi bi-plus-circle me-1"></i>Đăng xe cho thuê
                             </a>
                         </li>
@@ -84,17 +96,114 @@
     </main>
 
     <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <h5 class="fw-bold mb-1"><i class="bi bi-car-front-fill me-2 text-primary"></i>NeighborRide</h5>
-            <p class="small text-secondary mb-2">Nền tảng chia sẻ và cho thuê phương tiện văn minh nội khu dân cư</p>
-            <small class="text-secondary">&copy; 2026 - NeighborRide. Bảo lưu mọi quyền.</small>
-        </div>
-    </footer>
+        <div class="container">
+            <div class="row g-4 mb-4 mb-lg-5">
+                <!-- Col 1: Brand Info -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="sr-logo-icon me-2" style="background: rgba(255,255,255,0.1); color: #38bdf8;"
+                             aria-hidden="true">
+                            <i class="bi bi-car-front-fill"></i>
+                        </div>
+                        <div>
+                            <div class="sr-brand-title text-white">ShareRide</div>
+                            <div class="sr-brand-slogan text-white-50">Chia sẻ phương tiện - Kết nối cộng đồng</div>
+                        </div>
+                    </div>
+                    <p class="mb-4" style="line-height: 1.6; font-size: 0.875rem; color: #94a3b8;">
+                        Nền tảng chia sẻ phương tiện dành cho cư dân trong khu dân cư/chung cư. Cùng xây dựng cộng đồng
+                        văn minh, an toàn và bền vững.
+                    </p>
+                    <div class="d-flex align-items-center gap-1">
+                        <a href="#" class="sr-social-btn" title="Facebook" aria-label="Trang Facebook ShareRide"><i
+                            class="bi bi-facebook"></i></a>
+                            <a href="#" class="sr-social-btn" title="Chat / Zalo" aria-label="Kênh hỗ trợ Chat Zalo"><i
+                                class="bi bi-chat-dots-fill"></i></a>
+                                <a href="#" class="sr-social-btn" title="Youtube" aria-label="Kênh Youtube ShareRide"><i
+                                    class="bi bi-youtube"></i></a>
+                                </div>
+                            </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+                            <!-- Col 2: Quick Links -->
+                            <div class="col-6 col-sm-6 col-md-3 col-lg-2">
+                                <h6 class="sr-footer-title">Liên kết nhanh</h6>
+                                <ul class="sr-footer-links">
+                                    <li><a asp-controller="Home" asp-action="Index"><i
+                                        class="bi bi-chevron-right small me-1"></i>Trang chủ</a></li>
+                                        <li><a asp-controller="Vehicle" asp-action="Index"><i
+                                            class="bi bi-chevron-right small me-1"></i>Tìm phương tiện</a></li>
+                                            <li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"><i
+                                                class="bi bi-chevron-right small me-1"></i>Trang quản trị (Admin)</a></li>
+                                                <li><a href="/#huong-dan"><i class="bi bi-chevron-right small me-1"></i>Hướng dẫn</a></li>
+                                                <li><a href="#bang-gia"><i class="bi bi-chevron-right small me-1"></i>Bảng giá</a></li>
+                                                <li><a href="#tin-tuc"><i class="bi bi-chevron-right small me-1"></i>Tin tức</a></li>
+                                                <li><a href="#lien-he"><i class="bi bi-chevron-right small me-1"></i>Liên hệ</a></li>
+                                            </ul>
+                                        </div>
 
-</html>
+                                        <!-- Col 3: Customer Support -->
+                                        <div class="col-6 col-sm-6 col-md-3 col-lg-3">
+                                            <h6 class="sr-footer-title">Hỗ trợ khách hàng</h6>
+                                            <ul class="sr-footer-links">
+                                                <li><a href="#"><i class="bi bi-chevron-right small me-1"></i>Câu hỏi thường gặp</a></li>
+                                                <li><a href="#"><i class="bi bi-chevron-right small me-1"></i>Chính sách bảo mật</a></li>
+                                                <li><a href="#"><i class="bi bi-chevron-right small me-1"></i>Điều khoản dịch vụ</a></li>
+                                                <li><a href="#"><i class="bi bi-chevron-right small me-1"></i>Quy định cộng đồng</a></li>
+                                                <li><a href="#"><i class="bi bi-chevron-right small me-1"></i>Liên hệ hỗ trợ</a></li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- Col 4: App Download -->
+                                        <div class="col-12 col-md-6 col-lg-3">
+                                            <h6 class="sr-footer-title">Tải ứng dụng</h6>
+                                            <p class="mb-3" style="font-size: 0.875rem; color: #94a3b8;">Trải nghiệm tốt hơn trên ứng dụng di
+                                                động iOS và Android</p>
+                                                <div class="d-flex flex-row flex-md-column flex-wrap gap-2" style="max-width: 320px;">
+                                                    <!-- Google Play -->
+                                                    <a href="#"
+                                                       class="btn btn-dark d-inline-flex align-items-center py-2 px-3 border border-secondary text-white text-decoration-none rounded-3"
+                                                       style="background:#090e17;" aria-label="Tải về từ Google Play">
+                                                        <i class="bi bi-google-play fs-4 me-2 text-warning"></i>
+                                                        <div class="text-start lh-1">
+                                                            <small class="d-block text-secondary"
+                                                                   style="font-size: 0.6rem; text-transform: uppercase;">Get it on</small>
+                                                            <span class="fw-bold" style="font-size: 0.85rem;">Google Play</span>
+                                                        </div>
+                                                    </a>
+                                                    <!-- App Store -->
+                                                    <a href="#"
+                                                       class="btn btn-dark d-inline-flex align-items-center py-2 px-3 border border-secondary text-white text-decoration-none rounded-3"
+                                                       style="background:#090e17;" aria-label="Tải về từ Apple App Store">
+                                                        <i class="bi bi-apple fs-4 me-2 text-white"></i>
+                                                        <div class="text-start lh-1">
+                                                            <small class="d-block text-secondary"
+                                                                   style="font-size: 0.6rem; text-transform: uppercase;">Download on the</small>
+                                                            <span class="fw-bold" style="font-size: 0.85rem;">App Store</span>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Copyright -->
+                                        <div class="pt-4 border-top border-secondary border-opacity-25 d-flex flex-wrap justify-content-between align-items-center gap-2"
+                                             style="font-size: 0.825rem; color: #64748b;">
+                                            <div>
+                                                &copy; 2026 ShareRide. Nền tảng chia sẻ phương tiện văn minh. Tất cả quyền được bảo lưu.
+                                            </div>
+                                            <div class="d-flex gap-3">
+                                                <a href="#" class="text-decoration-none text-secondary">Bảo mật</a>
+                                                <a href="#" class="text-decoration-none text-secondary">Điều khoản</a>
+                                                <a href="#" class="text-decoration-none text-secondary">Trợ giúp</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </footer>
+
+                                <script src="~/lib/jquery/dist/jquery.min.js"></script>
+                                <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+                                <script src="~/js/site.js" asp-append-version="true"></script>
+                                @await RenderSectionAsync("Scripts", required: false)
+                            </body>
+
+                        </html>
