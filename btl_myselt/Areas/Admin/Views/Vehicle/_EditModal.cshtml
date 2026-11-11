@@ -1,3 +1,5 @@
+@model Vehicle
+
 <div class="modal fade" id="editModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -11,44 +13,47 @@
                 </div>
                 <div class="modal-body row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Tên xe</label>
-                        <input type="text" id="editName" name="Name" class="form-control" required />
+                        <label class="form-label">Tên xe <span class="text-danger">*</span></label>
+                        <input asp-for="Name" id="editName" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Trạng thái xe</label>
-                        <select id="editStatus" name="Status" class="form-select" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
+                        <select asp-for="Status" id="editStatus" class="form-select" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label">Loại xe</label>
-                        <select id="editCategoryId" name="CategoryId" class="form-select" asp-items="ViewBag.Categories" required></select>
+                        <select asp-for="CategoryId" id="editCategoryId" class="form-select" asp-items="ViewBag.Categories" required></select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Khu dân cư</label>
-                        <select id="editCommunityId" name="CommunityId" class="form-select" asp-items="ViewBag.Communities" required></select>
+                        <select asp-for="CommunityId" id="editCommunityId" class="form-select" asp-items="ViewBag.Communities" required></select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Chủ sở hữu</label>
-                        <select id="editOwnerId" name="OwnerId" class="form-select" asp-items="ViewBag.Owners" required></select>
+                        <select asp-for="OwnerId" id="editOwnerId" class="form-select" asp-items="ViewBag.Owners" required></select>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Hình thức chia sẻ</label>
-                        <select id="editShareType" name="ShareType" class="form-select" asp-items="Html.GetEnumSelectList<ShareType>()"></select>
+                        <select id="editShareType" asp-for="ShareType" class="form-select" asp-items="Html.GetEnumSelectList<ShareType>()"></select>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Giá thuê / ngày (VNĐ)</label>
-                        <input type="number" id="editPrice" name="Price" class="form-control" required />
+                        <input type="number" id="editPrice" asp-for="Price" class="form-control" required />
+                        <span asp-validation-for="Price" class="text-danger small"></span>
                     </div>
 
                     <div class="col-12">
                         <label class="form-label">Tình trạng xe</label>
-                        <input type="text" id="editCondition" name="Condition" class="form-control" />
+                        <input asp-for="Condition" id="editCondition" class="form-control" />
+                        <span asp-validation-for="Condition" class="text-danger small"></span>
                     </div>
 
                     <div class="col-12">
                         <label class="form-label">Mô tả chi tiết</label>
-                        <textarea id="editDescription" name="Description" class="form-control" rows="2"></textarea>
+                        <textarea asp-for="Description" id="editDescription" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

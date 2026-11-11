@@ -86,13 +86,14 @@
     </tbody>
 </table>
 
-<partial name="_CreateModal" />
-<partial name="_EditModal" />
+<partial name="_CreateModal" model="new Vehicle()" />
+<partial name="_EditModal" model="new Vehicle()" />
 <partial name="_DetailModal" />
 <partial name="_DeleteModal" />
 <partial name="_ImageModal" />
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script>
         var currentVehicleId = 0;
 
@@ -122,6 +123,7 @@
 
         $('#createForm').submit(function (e) {
             e.preventDefault();
+            if (!$(this).valid()) return;
             $.ajax({
                 url: '/Admin/Vehicle/Create',
                 type: 'POST',
@@ -169,6 +171,7 @@
 
         $('#editForm').submit(function (e) {
             e.preventDefault();
+            if (!$(this).valid()) return;
             var id = $('#editId').val();
             $.ajax({
                 url: '/Admin/Vehicle/Edit/' + id,
