@@ -16,7 +16,7 @@
             <th>Id</th>
             <th>Tên loại xe</th>
             <th>Mô tả</th>
-            <th>Hành động</th>
+            <th class="text-center" style="width: 180px;">Thao tác</th>
         </tr>
     </thead>
     <tbody>
@@ -28,7 +28,7 @@
                     <td>@item.Id</td>
                     <td>@item.Name</td>
                     <td>@item.Description</td>
-                    <td>
+                    <td class="text-center">
                         <button type="button" class="btn btn-warming btn-sm me-1" data-bs-toggle="modal"
                             data-bs-target="#editModal-@item.Id">Sửa</button>
                         <button type="button" class="btn btn-danger btn-sm btn-delete-confirm" 
